@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33403.182
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AM PME ASP API", "AM PME ASP API.csproj", "{62A37B72-47A8-485F-A8EA-792D9DD26045}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62A37B72-47A8-485F-A8EA-792D9DD26045}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62A37B72-47A8-485F-A8EA-792D9DD26045}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62A37B72-47A8-485F-A8EA-792D9DD26045}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62A37B72-47A8-485F-A8EA-792D9DD26045}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5174A08-B488-4378-9028-68B31020F26C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5174A08-B488-4378-9028-68B31020F26C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5174A08-B488-4378-9028-68B31020F26C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5174A08-B488-4378-9028-68B31020F26C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {822BEB81-A598-4F24-85B9-5E21B7C7D14A}
+	EndGlobalSection
+EndGlobal
