@@ -42,7 +42,6 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
-import Translations from 'src/layouts/components/Translations'
 
 
 
@@ -76,13 +75,7 @@ const etatColor ={
 type etatType = 'In Stock' | 'In Order' | 'In Maintenance' | 'In Use' | 'Retired' | 'Dispose'
 type etatColorType = 'primary' | 'warning' | 'error' | 'success' | 'info' | 'secondary'
 
-const getEtatColor = (row:any) :etatColorType => {
-  if (etatColor[row.etat as etatType] != undefined){
-    return etatColor[row.etat as etatType] as etatColorType
-  }
 
-  return 'info'
-}
 const formatDate = (date:Date) => {
   try {
     const d = new Date(date)
@@ -406,7 +399,7 @@ const allColumns=[
 const updatedColumns = allColumns.map(column => {
   return {
     ...column,
-    headerName: <Translations text={`${column.headerName}`} />
+    headerName: t(`${column.headerName}`)
   };
 });
 

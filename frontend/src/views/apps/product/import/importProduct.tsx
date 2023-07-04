@@ -37,7 +37,6 @@ const dispatch = useDispatch<AppDispatch>()
        //send file multipart/form-data
          //then close dialog    
          const formData = new FormData()
-            formData.append('file', file)
             axios.post(process.env.NEXT_PUBLIC_SERVER_URL+endpoints[classe], formData).then((res) => {
                 if (res.status === 200) {
                     toast.success(res.data)

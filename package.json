@@ -1,0 +1,23 @@
+{
+  "name": "am-pme",
+  "version": "0.9.0",
+  "description": "asset management tool for SMEs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AliDanTek/AM-PME.git"
+  },
+  "author": "Alidantek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AliDanTek/AM-PME/issues"
+  },
+  "homepage": "https://github.com/AliDanTek/AM-PME#readme",
+  "devDependencies": {
+    "husky": "^8.0.0"
+  }
+}
