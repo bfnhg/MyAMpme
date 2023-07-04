@@ -25,6 +25,7 @@ import FormHelperText from '@mui/material/FormHelperText'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchData as fetchEmployees} from 'src/store/apps/employee'
 import { fetchData as fetchEmplacements } from 'src/store/apps/emplacement'
+import { fetchData as fetchFournisseurs } from 'src/store/apps/fournisseur'
 import { AppDispatch, RootState } from 'src/store'
 import { EmployeeType } from 'src/types/apps/employeeType'
 import AddEmployeeDialog from '../../employee/add/addEmployeeDialog'
@@ -39,6 +40,8 @@ import DatePicker, { ReactDatePickerProps } from 'react-datepicker'
 import CustomInput from 'src/views/forms/picker/CustomInput'
 import { toast } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
+import AddFournisseurDialog from '../../fournisseur/add/addFournisseurDialog'
+import { FournisseurType } from 'src/types/apps/fournisseurType'
 
 interface AddFormProps {
   count: number
@@ -66,10 +69,11 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
   const schema = yup.object().shape({
     etiquette: yup.string(),
     etat: yup.number(),
-    numeroSerie: yup.string().required('Veuillez saisir le numero de serie'),
+    numeroSerie: yup.string(),
     fonction: yup.string(),
     assignedTo: yup.string(),
     emplacement: yup.string(),
+    fournisser: yup.string(),
     groupe: yup.string(),
     gerePar: yup.string(),
     proprietede: yup.string(),
@@ -118,6 +122,7 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
       managedById: data.gerePar!==''?parseInt(data.gerePar):null,
       ownedById: data.proprietede!==''?parseInt(data.proprietede):null,
       emplacementId: data.emplacement!==''?parseInt(data.emplacement):null,
+      fournisseurId: data.fournisseur!==''?parseInt(data.fournisseur):null,
       numBonCommande: data.numBonCommande!==''?data.numBonCommande:null,
       dateAchat: data.dateAchat!==null?data.dateAchat:null
       
@@ -159,15 +164,18 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
   const dispatch = useDispatch<AppDispatch>()
   const employeeStore = useSelector((state: RootState) => state.employee)
   const emplacementStore = useSelector((state: RootState) => state.emplacement)
+  const fournisseurStore = useSelector((state: RootState) => state.fournisseur)
 
     useEffect(() => {
     dispatch(fetchEmployees({q:''}))
     dispatch(fetchEmplacements({q:''}))
+    dispatch(fetchFournisseurs({q:''}))
     
   }, [dispatch])
 
   const [employeeDialogShow, setEmployeeDialogShow] = useState(false)
   const [emplacementDialogShow, setEmplacementDialogShow] = useState(false)
+  const [fournisseurDialogShow, setFournisseurDialogShow] = useState(false)
 
   const handleEmployeeAdd = ()=>{
     setEmployeeDialogShow(true)
@@ -177,6 +185,11 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
     setEmplacementDialogShow(true)
 
   }
+  const handleFournisseurAdd = ()=>{
+    setFournisseurDialogShow(true)
+
+  }
+
 
   return (
     <DatePickerWrapper>
@@ -189,6 +202,11 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
       mode='add'
       show={emplacementDialogShow}
       setShow={setEmplacementDialogShow}
+      />
+      <AddFournisseurDialog
+      mode='add'
+      show={fournisseurDialogShow}
+      setShow={setFournisseurDialogShow}
       />
       <Card>
         <CardHeader
@@ -507,6 +525,57 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
                 )}
               </FormControl>
             </Grid>
+
+<Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <Controller
+                  name='fournisseur'
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field: { value, onChange } }) => (
+                    <>
+                      <InputLabel id='demo-simple-select-helper-label'>
+                        {t('Fournisseur')}
+                      </InputLabel>
+                      <Select
+                        value={value}
+                        label='Fournisseur'
+                        labelId='demo-simple-select-helper-label'
+                        onChange={onChange}
+                        error={Boolean(errors.fournisseur)}
+                      >
+                        <CustomSelectItem value='' onClick={handleFournisseurAdd} 
+                        >
+                          <Box
+                            sx={{ display: 'flex', alignItems: 'center', color: 'success.main', '& svg': { mr: 2 } }}
+                          >
+                            <Icon icon='mdi:plus' fontSize={20} />
+                            {t('Add New Fournisseur')}
+                          </Box>
+                        </CustomSelectItem>
+                        <MenuItem value=''>
+                          <Typography
+                            variant='subtitle2'
+                            fontWeight={800}
+                            >{t('None')}</Typography>
+                        </MenuItem>
+                        {
+                          fournisseurStore.data.map((fournisseur : FournisseurType) => (
+                            <MenuItem key={fournisseur.id} value={fournisseur.id}>
+                              {fournisseur.name}
+                            </MenuItem>
+                          ))
+                        }
+                      </Select>
+                    </>
+                  )}
+                />
+                {errors.fournisseur && (
+                  <FormHelperText sx={{ color: 'error.main' }}>{errors.fournisseur.message}</FormHelperText>
+                )}
+              </FormControl>
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <Controller

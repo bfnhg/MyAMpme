@@ -4,7 +4,7 @@
 #!/bin/sh
 
 # navigate to frontend folder
-cd ../frontend
+cd ./frontend
 
 # install any dependencies
 npm install && npm run lint && npm run build
