@@ -37,7 +37,7 @@ import CardActions from '@mui/material/CardActions'
 import Button from '@mui/material/Button'
 
 import DatePicker, { ReactDatePickerProps } from 'react-datepicker'
-import CustomInput from 'src/views/forms/form-elements/pickers/PickersCustomInput'
+import CustomInput from 'src/views/forms/picker/CustomInput'
 import { toast } from 'react-hot-toast'
 import axios from 'axios'
 

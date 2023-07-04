@@ -44,7 +44,6 @@ import axios from 'axios'
 
 // ** Types Imports
 import { RootState, AppDispatch } from 'src/store'
-import { CardStatsType } from 'src/@fake-db/types'
 import { ThemeColor } from 'src/@core/layouts/types'
 import { UsersType } from 'src/types/apps/userTypes'
 import { CardStatsHorizontalProps } from 'src/@core/components/card-statistics/types'

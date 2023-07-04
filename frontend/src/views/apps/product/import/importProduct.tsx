@@ -1,6 +1,6 @@
 import Dialog from '@mui/material/Dialog'
 import {toast} from 'react-hot-toast'
-import FileUploaderRestrictions from 'src/views/forms/form-elements/file-uploader/FileUploaderRestrictions'
+import FileUploaderRestrictions from 'src/views/forms/file-uploader/FileUploaderRestrictions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'

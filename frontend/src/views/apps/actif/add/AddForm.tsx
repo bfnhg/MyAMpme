@@ -36,7 +36,7 @@ import { classNames } from 'src/global/ClassNames'
 import { http } from 'src/global/http'
 import { date } from 'yup/lib/locale'
 import DatePicker, { ReactDatePickerProps } from 'react-datepicker'
-import CustomInput from 'src/views/forms/form-elements/pickers/PickersCustomInput'
+import CustomInput from 'src/views/forms/picker/CustomInput'
 import { toast } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
