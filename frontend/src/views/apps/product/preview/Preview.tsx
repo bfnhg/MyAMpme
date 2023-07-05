@@ -15,8 +15,6 @@ import axios from 'axios'
 import format from 'date-fns/format'
 
 
-import AddPaymentDrawer from 'src/views/apps/invoice/shared-drawer/AddPaymentDrawer'
-import SendInvoiceDrawer from 'src/views/apps/invoice/shared-drawer/SendInvoiceDrawer'
 import PreviewCard from './PreviewCard'
 import PreviewActions from './PreviewActions'
 import { classNames } from 'src/global/ClassNames'

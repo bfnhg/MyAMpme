@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+#!/bin/sh
+
+# navigate to frontend folder
+cd ./frontend
+
+# install any dependencies
+npm install && npm run lint && npm run build

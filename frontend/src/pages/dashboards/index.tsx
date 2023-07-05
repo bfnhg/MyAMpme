@@ -11,7 +11,6 @@ import CardStatisticsVerticalComponent from 'src/@core/components/card-statistic
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
 
 // ** Demo Components Imports
-import AnalyticsTable from 'src/views/dashboards/analytics/AnalyticsTable'
 import AssetsOverView from 'src/views/dashboards/AssetsOverView'
 import AssetsHistory from 'src/views/dashboards/AssetsHistory'
 import AssetsByEtatChart from 'src/views/dashboards/AssetsByEtatChart'

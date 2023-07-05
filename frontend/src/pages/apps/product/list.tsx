@@ -13,7 +13,14 @@ import { styled } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import { DataGrid, GridRowId, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarExport, frFR } from '@mui/x-data-grid'
+import {
+  DataGrid,
+  GridRowId,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarExport,
+  frFR
+} from '@mui/x-data-grid'
 import { useSettings } from 'src/@core/hooks/useSettings'
 
 // ** Icon Imports
@@ -39,10 +46,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
-import Translations from 'src/layouts/components/Translations'
-
-
-
+import { set } from 'nprogress'
 
 interface CustomInputProps {
   dates: Date[]
@@ -63,13 +67,12 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }))
 
 // ** Vars
-const formatDate = (date:Date) =>{
+const formatDate = (date: Date) => {
   const d = new Date(date)
-  if(d.getFullYear() === 1) return 'N/A'
+  if (d.getFullYear() === 1) return 'N/A'
 
   return format(d, 'dd/MM/yyyy')
 }
-
 
 const defaultColumns = [
   {
@@ -85,37 +88,42 @@ const defaultColumns = [
     minWidth: 150,
     field: 'nomModele',
     headerName: 'Model Name',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.nomModele }`}</Typography>
-  },{
+    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.nomModele}`}</Typography>
+  },
+  {
     flex: 0.1,
     minWidth: 125,
     field: 'numeroModele',
     headerName: 'Model Number',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numeroModele}`}</Typography>
-  },{
+  },
+  {
     flex: 0.1,
     minWidth: 125,
     field: 'classe',
     headerName: 'Class',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.classe}`}</Typography>
-  },{
+  },
+  {
     flex: 0.1,
     minWidth: 90,
     field: 'coutAcquisition',
     headerName: 'Cost',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.coutAcquisition }$`}</Typography>
-  },{
+    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.coutAcquisition}$`}</Typography>
+  },
+  {
     flex: 0.1,
     minWidth: 90,
     field: 'manufacturer',
     headerName: 'Manufacturer',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.manufacturier}`}</Typography>
-  },{
+  },
+  {
     flex: 0.1,
     minWidth: 90,
     field: 'mtbf',
     headerName: 'MTBF',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{row.mtbf?`${row.mtbf} H`:'N/A'}</Typography>
+    renderCell: ({ row }: CellType) => <Typography variant='body2'>{row.mtbf ? `${row.mtbf} H` : 'N/A'}</Typography>
   },
   {
     flex: 0.1,
@@ -123,60 +131,63 @@ const defaultColumns = [
     field: 'periodeGarantie',
     headerName: 'Waranty Period',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.periodeGarantie} mois`}</Typography>
-  },{
+  },
+  {
     flex: 0.15,
     minWidth: 50,
     field: 'finVie',
     headerName: 'End of Life',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{formatDate(row.finVie)}</Typography>
-  },{
+  },
+  {
     flex: 0.15,
-    minWidth: 70    ,
+    minWidth: 70,
     field: 'finSupport',
     headerName: 'End of Support',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{formatDate(row.finSupport)}</Typography>
-  },{
+  },
+  {
     flex: 0.15,
     minWidth: 70,
     field: 'createdAt',
     headerName: 'Created At',
     type: 'date',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{formatDate(row.createdAt)}</Typography>
-  },{
+  },
+  {
     flex: 0.15,
     minWidth: 70,
     field: 'updatedAt',
     headerName: 'Updated At',
     type: 'date',
     renderCell: ({ row }: CellType) => <Typography variant='body2'>{formatDate(row.updatedAt)}</Typography>
-
-  },{
+  },
+  {
     flex: 0.15,
     minWidth: 70,
     field: 'createdBy',
     headerName: 'Created By',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.creator? row.creator.fullName:'N/A'}`}</Typography>
-  },{
+    renderCell: ({ row }: CellType) => (
+      <Typography variant='body2'>{`${row.creator ? row.creator.fullName : 'N/A'}`}</Typography>
+    )
+  },
+  {
     flex: 0.15,
     minWidth: 70,
     field: 'updatedBy',
     headerName: 'Updated By',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.updater? row.updater.fullName:'N/A'}`}</Typography>
+    renderCell: ({ row }: CellType) => (
+      <Typography variant='body2'>{`${row.updater ? row.updater.fullName : 'N/A'}`}</Typography>
+    )
   }
 ]
-const updatedColumns = defaultColumns.map(column => {
-  return {
-    ...column,
-    headerName: <Translations text={`${column.headerName}`} />
-  };
-});
 
-const  CustomToolbar = ()=> {
+const CustomToolbar = () => {
   return (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
     </GridToolbarContainer>
-  );
+  )
 }
 
 /* eslint-disable */
@@ -195,15 +206,21 @@ const CustomInput = forwardRef((props: CustomInputProps, ref) => {
 
 const ProductList = () => {
   // ** State
-  const [value, setValue] = useState<string>('')
+  const [currentQuery, setCurrentQuery] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
   const { settings, saveSettings } = useSettings()
-const ability = useContext(AbilityContext)
+  const ability = useContext(AbilityContext)
   const [visibilityModel, setVisibilityModel] = useState<any>(settings.productColumnVisibilityModel)
-const [deleteDialog, setDeleteDialog] = useState(false)
-const [selectedRow, setSelectedRow] = useState<any>(null)
-const{ i18n} = useTranslation()
+  const [deleteDialog, setDeleteDialog] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<any>(null)
+  const { t, i18n } = useTranslation()
+  const updatedColumns = defaultColumns.map(column => {
+    return {
+      ...column,
+      headerName: t(`${column.headerName}`)
+    }
+  })
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
@@ -212,16 +229,19 @@ const{ i18n} = useTranslation()
   useEffect(() => {
     dispatch(
       fetchData({
-        q: value
+        q: ''
       })
     )
-  }, [dispatch, value])
+  }, [dispatch])
 
   const handleFilter = (val: string) => {
-    setValue(val)
+    dispatch(
+      fetchData({
+        q: val
+      })
+    )
+    setCurrentQuery(val)
   }
-
-
 
   const columns = [
     ...updatedColumns,
@@ -238,51 +258,55 @@ const{ i18n} = useTranslation()
               <Icon icon='mdi:eye-outline' fontSize={20} />
             </IconButton>
           </Tooltip>
-          {
-            ability.can('delete', 'product') && <Tooltip title='Delete '>
-            <IconButton size='small' onClick={()=>{
-              setSelectedRow(row.id)
-              setDeleteDialog(true)
-            }}>
-              <Icon icon='mdi:delete-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-          }
-          {
-            ability.can('update', 'product') && <Tooltip title='Edit'>
-            <IconButton size='small' component={Link} href={`/apps/product/edit/${row.id}`}>
-              <Icon icon='mdi:pencil-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-          }
-         
+          {ability.can('delete', 'product') && (
+            <Tooltip title='Delete '>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  setSelectedRow(row.id)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-outline' fontSize={20} />
+              </IconButton>
+            </Tooltip>
+          )}
+          {ability.can('update', 'product') && (
+            <Tooltip title='Edit'>
+              <IconButton size='small' component={Link} href={`/apps/product/edit/${row.id}`}>
+                <Icon icon='mdi:pencil-outline' fontSize={20} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       )
     }
   ]
   const exportXlsx = () => {
     let ids = [...selectedRows]
-    if(ids.length==0){
+    if (ids.length == 0) {
       ids = store.data.map((item: any) => item.id)
     }
 
-    const exportData = store.data.filter((item: any) => ids.includes(item.id)).map((item: any) => {
-      return {
-        id: item.id,
-        nomModele: item.nomModele,
-        numeroModele: item.numeroModele,
-        classe: item.classe,
-        coutAcquisition: item.coutAcquisition,
-        manufacturer: item.manufacturier,
-        mtbf: item.mtbf?`${item.mtbf} H`:'N/A',
-        periodeGarantie: item.periodeGarantie,
-        finVie: formatDate(item.finVie),
-        finSupport: formatDate(item.finSupport),
-      }
-    })
+    const exportData = store.data
+      .filter((item: any) => ids.includes(item.id))
+      .map((item: any) => {
+        return {
+          id: item.id,
+          nomModele: item.nomModele,
+          numeroModele: item.numeroModele,
+          classe: item.classe,
+          coutAcquisition: item.coutAcquisition,
+          manufacturer: item.manufacturier,
+          mtbf: item.mtbf ? `${item.mtbf} H` : 'N/A',
+          periodeGarantie: item.periodeGarantie,
+          finVie: formatDate(item.finVie),
+          finSupport: formatDate(item.finSupport)
+        }
+      })
     const allColumns = columns.map((item: any) => item.field)
 
-const updatedVisibilityModel = allColumns.reduce((acc: any, item: any) => {
+    const updatedVisibilityModel = allColumns.reduce((acc: any, item: any) => {
       if (visibilityModel[item] === undefined) {
         acc[item] = true
       } else {
@@ -291,54 +315,50 @@ const updatedVisibilityModel = allColumns.reduce((acc: any, item: any) => {
 
       return acc
     }, {})
-    
-    
-    exportExcel(updatedVisibilityModel,exportData, 'products')
+
+    exportExcel(updatedVisibilityModel, exportData, 'products')
   }
-     const deleteProduct = (id) => {
+  const deleteProduct = id => {
     return new Promise(async (resolve, reject) => {
-      await http.delete(`Produits/${id}`).then((res) => {
-        dispatch(
-          fetchData({
-            q: value
-          })
-        )
-        resolve(res)
-      }).catch((err) => {
-        reject(err)
-      }
-      )
+      await http
+        .delete(`Produits/${id}`)
+        .then(res => {
+          dispatch(
+            fetchData({
+              q: currentQuery
+            })
+          )
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 
-
   return (
     <DatePickerWrapper>
-      <DeleteDialog
-        open={deleteDialog}
-        setOpen={setDeleteDialog}
-        deelete={deleteProduct}
-        rowId={selectedRow}
-        />
+      <DeleteDialog open={deleteDialog} setOpen={setDeleteDialog} deelete={deleteProduct} rowId={selectedRow} />
       <Grid container spacing={6}>
-        
         <Grid item xs={12}>
           <Card>
-            <TableHeader exportXlsx={exportXlsx} value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
-            
+            <TableHeader
+              exportXlsx={exportXlsx}
+              selectedRows={selectedRows}
+              handleFilter={handleFilter}
+            />
+
             <DataGrid
-            key={i18n.language}
-            initialState={
-              {
-                columns:{
-                  columnVisibilityModel:visibilityModel
+              key={i18n.language}
+              initialState={{
+                columns: {
+                  columnVisibilityModel: visibilityModel
                 }
-              }
-            }
+              }}
               autoHeight
               pagination
               rows={store.data}
-
+              
               // @ts-ignore
               columns={columns}
               checkboxSelection
@@ -346,15 +366,15 @@ const updatedVisibilityModel = allColumns.reduce((acc: any, item: any) => {
               pageSize={Number(pageSize)}
               rowsPerPageOptions={[10, 25, 50]}
               onSelectionModelChange={rows => setSelectedRows(rows)}
-              onColumnVisibilityModelChange={(model) => {
+              onColumnVisibilityModelChange={model => {
                 setVisibilityModel(model)
-                saveSettings({ ...settings,productColumnVisibilityModel: model })
+                saveSettings({ ...settings, productColumnVisibilityModel: model })
               }}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
               components={{
-                Toolbar: CustomToolbar,
+                Toolbar: CustomToolbar
               }}
-              localeText={i18n.language==='fr'?frFR.components.MuiDataGrid.defaultProps.localeText:{}}
+              localeText={i18n.language === 'fr' ? frFR.components.MuiDataGrid.defaultProps.localeText : {}}
             />
           </Card>
         </Grid>
@@ -364,9 +384,8 @@ const updatedVisibilityModel = allColumns.reduce((acc: any, item: any) => {
 }
 
 ProductList.acl = {
-  subject : 'product',
-  action : 'read'
+  subject: 'product',
+  action: 'read'
 }
-
 
 export default ProductList

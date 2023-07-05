@@ -25,7 +25,7 @@ const searchActif = (params: DataParams, data: any) => {
     (actif:ActifType) =>{
       
       
-      return  actif.numeroSerie.toLowerCase().includes(queryLowered) || actif.nom.toLowerCase().includes(queryLowered)
+      return  actif.numeroSerie.toLowerCase().includes(queryLowered) || actif.nom.toLowerCase().includes(queryLowered) || actif.numBonCommande?.toLowerCase().includes(queryLowered)
     }
   )
 
