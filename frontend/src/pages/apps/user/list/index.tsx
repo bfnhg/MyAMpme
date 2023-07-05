@@ -276,7 +276,7 @@ const updatedColumns = columns.map(column => {
 const UserList = () => {
   // ** State
   const [role, setRole] = useState<string>('')
-  const [value, setValue] = useState<string>('')
+  const [currentQuery, setCurrentQuery] = useState<string>('')
   const [status, setStatus] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false)
@@ -291,14 +291,22 @@ const UserList = () => {
       fetchData({
         role,
         status,
-        q: value,
+        q: currentQuery,
         currentPlan: 'all',
       })
     )
-  }, [dispatch, role, status, value])
+  }, [dispatch, role, status])
 
   const handleFilter = useCallback((val: string) => {
-    setValue(val)
+    dispatch(
+      fetchData({
+        role,
+        status,
+        q: val,
+        currentPlan: 'all',
+      })
+    )
+    setCurrentQuery(val)
   }, [])
 
   const handleRoleChange = useCallback((e: SelectChangeEvent) => {
@@ -369,7 +377,7 @@ const UserList = () => {
             </Grid>
           </CardContent>
           <Divider />
-          <TableHeader value={value} handleFilter={handleFilter} toggle={toggleAddUserDrawer} />
+          <TableHeader handleFilter={handleFilter} toggle={toggleAddUserDrawer} />
           <DataGrid
           key={i18n.language}
             autoHeight

@@ -125,7 +125,7 @@ const CustomInput = forwardRef((props: CustomInputProps, ref) => {
 
 const FournisseurList = () => {
   // ** State
-  const [value, setValue] = useState<string>('')
+  const [currentQuery, setCurrentQuery] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
     const [show,setShow] = useState<boolean>(false)
@@ -142,13 +142,18 @@ const [selectedRow,setSelectedRow] = useState<any>(null)
   useEffect(() => {
     dispatch(
       fetchData({
-        q: value
+        q: ''
       })
     )
-  }, [dispatch, value])
+  }, [dispatch])
 
   const handleFilter = (val: string) => {
-    setValue(val)
+     dispatch(
+      fetchData({
+        q: val
+      })
+    )
+    setCurrentQuery(val)
   }
 
 const handleEdit = (fournisseur:FournisseurType) => {
@@ -230,7 +235,7 @@ const removeNullFromColumns = (columns: any) => {
       await http.delete(`Fournisseurs/${id}`).then((res) => {
         dispatch(
           fetchData({
-            q: value
+            q: currentQuery
           })
         )
         resolve(res)
@@ -261,7 +266,7 @@ const removeNullFromColumns = (columns: any) => {
             <TableHeader 
             handleAdd={handleAdd}
             exportXlsx={exportXlsx}
-            value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+             selectedRows={selectedRows} handleFilter={handleFilter} />
             
             <DataGrid
             key={i18n.language}

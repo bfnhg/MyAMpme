@@ -42,6 +42,7 @@ import { AbilityContext } from 'src/layouts/components/acl/Can'
 import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
+import { set } from 'nprogress'
 
 
 
@@ -125,7 +126,7 @@ const CustomInput = forwardRef((props: CustomInputProps, ref) => {
 
 const ActifList = () => {
   // ** State
-  const [value, setValue] = useState<string>('')
+  const [currentQuery, setCurrentQuery] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
   const { settings, saveSettings } = useSettings()
@@ -411,18 +412,23 @@ allColumns.forEach(column => {
   headers[column.headerName] = '';
 });
 
-const headersJSON = JSON.stringify(headers);
-console.log(headersJSON);
-  useEffect(() => {
-    dispatch(
-      fetchData({
-        q: value
-      })
-    )
-  }, [dispatch, value])
+useEffect(() => {
+  
+  dispatch(
+    fetchData({
+      q: ''
+    })
+  )
+}, [dispatch])
+
 
   const handleFilter = (val: string) => {
-    setValue(val)
+    dispatch(
+      fetchData({
+        q: val
+      })
+    )
+    setCurrentQuery(val)
   }
 
   
@@ -531,7 +537,7 @@ console.log(headersJSON);
       await http.delete(`Actifs/${id}`).then((res) => {
         dispatch(
           fetchData({
-            q: value
+            q: currentQuery
           })
         )
         resolve(res)
@@ -557,7 +563,7 @@ console.log(headersJSON);
           <Card>
             <TableHeader 
             exportXlsx={exportXlsx}
-            value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+            selectedRows={selectedRows} handleFilter={handleFilter} />
             
             <DataGrid
             initialState={{

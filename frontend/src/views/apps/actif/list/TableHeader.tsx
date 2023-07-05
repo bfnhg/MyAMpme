@@ -1,4 +1,3 @@
-
 // ** Next Import
 import Link from 'next/link'
 
@@ -14,23 +13,15 @@ import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import ListItemText from '@mui/material/ListItemText'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { useContext } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useTranslation } from 'react-i18next'
+import { debounce } from 'lodash'
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
 
-const MenuProps = {
-  PaperProps: {
-    style: {
-      width: 250,
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
-    }
-  }
-}
 interface TableHeaderProps {
-  value: string
   selectedRows: GridRowId[]
   handleFilter: (val: string) => void
   exportXlsx: () => void
@@ -38,9 +29,16 @@ interface TableHeaderProps {
 
 const TableHeader = (props: TableHeaderProps) => {
   // ** Props
-  const { value, selectedRows, handleFilter } = props
-const ability = useContext(AbilityContext)
+  const { selectedRows, handleFilter } = props
+  const [value, setValue] = useState<string>('')
+  const ability = useContext(AbilityContext)
   const { t } = useTranslation()
+  const handleFilterDebounced = useCallback(
+    debounce(value => {
+      handleFilter(value)
+    }, 500),
+    [] // dependencies
+  )
 
   return (
     <Box
@@ -69,13 +67,16 @@ const ability = useContext(AbilityContext)
           value={value}
           sx={{ mr: 4, mb: 2 }}
           placeholder={t('Search')}
-          onChange={e => handleFilter(e.target.value)}
+          onChange={e => {
+            setValue(e.target.value)
+            handleFilterDebounced(e.target.value)
+          }}
         />
-        {
-          ability.can('create', 'actif') && <Button sx={{ mb: 2 }} component={Link} variant='contained' href='/apps/actif/add'>
-          {t('Add')}
-        </Button>
-        }
+        {ability.can('create', 'actif') && (
+          <Button sx={{ mb: 2 }} component={Link} variant='contained' href='/apps/actif/add'>
+            {t('Add')}
+          </Button>
+        )}
       </Box>
     </Box>
   )

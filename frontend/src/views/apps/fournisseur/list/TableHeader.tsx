@@ -7,23 +7,30 @@ import Button from '@mui/material/Button'
 import { GridRowId } from '@mui/x-data-grid'
 import TextField from '@mui/material/TextField'
 import Icon from 'src/@core/components/icon'
-import { useContext } from 'react'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useTranslation } from 'react-i18next'
+import { debounce } from 'lodash'
+import { useCallback, useContext, useState } from 'react'
 
 interface TableHeaderProps {
-  value: string
   selectedRows: GridRowId[]
   handleFilter: (val: string) => void
-  handleAdd : ()=>void
+  handleAdd: () => void
   exportXlsx: () => void
 }
 
 const TableHeader = (props: TableHeaderProps) => {
   // ** Props
-  const { value, handleFilter } = props
-  const ability =useContext(AbilityContext)
-  const {t} = useTranslation()
+  const { handleFilter } = props
+  const ability = useContext(AbilityContext)
+  const { t } = useTranslation()
+  const [value, setValue] = useState<string>('')
+  const handleFilterDebounced = useCallback(
+    debounce(value => {
+      handleFilter(value)
+    }, 500),
+    [] // dependencies
+  )
 
   return (
     <Box
@@ -37,7 +44,7 @@ const TableHeader = (props: TableHeaderProps) => {
         justifyContent: 'space-between'
       }}
     >
-     <Button
+      <Button
         sx={{ mr: 4, mb: 2 }}
         color='secondary'
         variant='outlined'
@@ -50,19 +57,24 @@ const TableHeader = (props: TableHeaderProps) => {
         <TextField
           size='small'
           value={value}
-          sx={{ mr: 4, mb: 2 ,width: 400}}
+          sx={{ mr: 4, mb: 2, width: 400 }}
           placeholder={t('Search')}
-          onChange={e => handleFilter(e.target.value)}
+          onChange={e => {
+            setValue(e.target.value)
+            handleFilterDebounced(e.target.value)
+          }}
         />
-        {
-          ability.can('create', 'fournisseur') && (<Button sx={{ mb: 2 }} variant='contained' onClick={
-          ()=>{props.handleAdd()}
-        }
-        >
-          {t('Add')}
-        </Button>
-        )
-        }
+        {ability.can('create', 'fournisseur') && (
+          <Button
+            sx={{ mb: 2 }}
+            variant='contained'
+            onClick={() => {
+              props.handleAdd()
+            }}
+          >
+            {t('Add')}
+          </Button>
+        )}
       </Box>
     </Box>
   )

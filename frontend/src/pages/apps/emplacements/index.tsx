@@ -111,7 +111,7 @@ const CustomInput = forwardRef((props: CustomInputProps, ref) => {
 
 const EmplacementList = () => {
   // ** State
-  const [value, setValue] = useState<string>('')
+  const [currentQuery, setCurrentQuery] = useState<string>('')
   const {t,i18n} = useTranslation()
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
@@ -129,13 +129,18 @@ const [selectedRow,setSelectedRow] = useState<any>(null)
   useEffect(() => {
     dispatch(
       fetchData({
-        q: value
+        q: ''
       })
     )
-  }, [dispatch, value])
+  }, [dispatch])
 
   const handleFilter = (val: string) => {
-    setValue(val)
+    dispatch(
+      fetchData({
+        q: val
+      })
+    )
+    setCurrentQuery(val)
   }
 
 const handleEdit = (emplacement:EmplacementType) => {
@@ -218,7 +223,7 @@ const handleAdd = () => {
       await http.delete(`Emplacements/${id}`).then((res) => {
         dispatch(
           fetchData({
-            q: value
+            q: currentQuery
           })
         )
         resolve(res)
@@ -251,7 +256,7 @@ const handleAdd = () => {
             exportXlsx={exportXlsx}
             handleAdd={handleAdd}
             
-            value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+            selectedRows={selectedRows} handleFilter={handleFilter} />
             
             <DataGrid
             key={i18n.language}

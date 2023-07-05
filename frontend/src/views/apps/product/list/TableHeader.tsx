@@ -8,12 +8,13 @@ import { GridRowId } from '@mui/x-data-grid'
 import TextField from '@mui/material/TextField'
 import Icon from 'src/@core/components/icon'
 import { exportExcel } from 'src/utils/exportExcel'
-import { useContext } from 'react'
+import { useCallback, useContext, useState } from 'react'
+
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 import { useTranslation } from 'react-i18next'
+import { debounce } from 'lodash'
 
 interface TableHeaderProps {
-  value: string
   selectedRows: GridRowId[]
   handleFilter: (val: string) => void
   exportXlsx: () => void
@@ -21,9 +22,17 @@ interface TableHeaderProps {
 
 const TableHeader = (props: TableHeaderProps) => {
   // ** Props
-  const { value, handleFilter,exportXlsx } = props
+  const { handleFilter,exportXlsx } = props
   const ability = useContext(AbilityContext)
   const {t} =useTranslation()
+  const [value, setValue] = useState<string>('')
+
+ const handleFilterDebounced = useCallback(
+    debounce(value => {
+      handleFilter(value)
+    }, 500),
+    [] // dependencies
+  )
 
   return (
     <Box
@@ -52,7 +61,10 @@ const TableHeader = (props: TableHeaderProps) => {
           value={value}
           sx={{ mr: 4, mb: 2 ,width: 400}}
           placeholder={t('Search')}
-          onChange={e => handleFilter(e.target.value)}
+        onChange={e => {
+            setValue(e.target.value)
+            handleFilterDebounced(e.target.value)
+          }}
         />
         {
           ability.can('create', 'product') && <Button sx={{ mb: 2 }} component={Link} variant='contained' href='/apps/product/add'>
