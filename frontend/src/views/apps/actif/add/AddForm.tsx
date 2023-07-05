@@ -69,7 +69,9 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
   const schema = yup.object().shape({
     etiquette: yup.string(),
     etat: yup.number(),
-    numeroSerie: yup.string(),
+    numeroSerie: yup.string().when('etat', (etat : number, schema) => {
+        return etat !== Etat['In Order'] ? schema.required(t('Serial Number is required')) : schema
+    }),
     fonction: yup.string(),
     assignedTo: yup.string(),
     emplacement: yup.string(),
