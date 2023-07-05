@@ -232,7 +232,7 @@ const ActifList = () => {
       flex: 0.15,
       field: 'numBonCommande',
       headerName: 'Order Number',
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numBonCommande}`}</Typography>
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numBonCommande??'N/A'}`}</Typography>
     },
     {
       minWidth: 150,
@@ -423,7 +423,7 @@ const ActifList = () => {
       flex: 0.15,
       field: 'fonction',
       headerName: 'Function',
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.fonction ?? 'N/A'}`}</Typography>
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${!row.fonction || row.fonction==="" ? 'N/A':row.fonction}`}</Typography>
     },
     {
       minWidth: 150,
