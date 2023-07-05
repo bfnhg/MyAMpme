@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AMPMEASPAPI.Migrations
 {
     [DbContext(typeof(MyDataContext))]
-    [Migration("20230405174420_initial")]
-    partial class initial
+    [Migration("20230705122210_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

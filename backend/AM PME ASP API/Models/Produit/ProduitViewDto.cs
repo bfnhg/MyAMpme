@@ -2,8 +2,8 @@
 
 namespace AM_PME_ASP_API.Models.Produit
 {
-	public class ProduitViewDto
-	{
+    public class ProduitViewDto
+    {
         public int Id { get; set; }
         public string NomModele { get; set; }
         public string NumeroModele { get; set; }

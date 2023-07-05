@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AM_PME_ASP_API.Models.Fournisseur
 {
-	public class FournisseurCreateDto
-	{
+    public class FournisseurCreateDto
+    {
         [Required(ErrorMessage = "Le nom du Fournisseur est obligatoire !")]
         [MaxLength(100, ErrorMessage = "Le nom du Fournisseur ne peut pas dépasser {1} caractères.")]
         public string Name { get; set; }
@@ -21,8 +21,8 @@ namespace AM_PME_ASP_API.Models.Fournisseur
         [MaxLength(200, ErrorMessage = "L'adresse ne peut pas dépasser {1} caractères.")]
         public string Adresse { get; set; }
 
-        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+        public DateTime? UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
     }
 }
 

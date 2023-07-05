@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AM_PME_ASP_API.Repositories.Imp
 {
-	public class ProduitRepository : IProduitRepository
-	{
+    public class ProduitRepository : IProduitRepository
+    {
         private readonly MyDataContext _db;
         private readonly IActifRepository _actifRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -28,21 +28,16 @@ namespace AM_PME_ASP_API.Repositories.Imp
             _userManager = userManager;
         }
 
-
         public async Task<Produit> CreateProduit(Produit produit)
         {
             var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext == null)
-            {
-                throw new NullReferenceException("HttpContext is null.");
-            }
+
+            if (httpContext == null) { throw new NullReferenceException("HttpContext is null."); }
             var user = await _userManager.GetUserAsync(httpContext.User);
-            if (user == null)
-            {
-                throw new InvalidOperationException("User not found.");
-            }
+
+            if (user == null) { throw new InvalidOperationException("User not found."); }
             produit.CreatedBy = user.Id;
-            produit.CreatedAt = DateTime.UtcNow;
+            produit.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             await _db.Produits.AddAsync(produit);
             await _db.SaveChangesAsync();
 
@@ -62,7 +57,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 throw new InvalidOperationException("User not found.");
             }
             produit.UpdatedBy = user.Id;
-            produit.UpdatedAt = DateTime.UtcNow;
+            produit.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             _db.Produits.Update(produit);
             await _db.SaveChangesAsync();
 
@@ -117,4 +112,3 @@ namespace AM_PME_ASP_API.Repositories.Imp
         }
     }
 }
-

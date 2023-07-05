@@ -37,7 +37,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 .Include(a => a.Produit)
                 .FirstOrDefault(a => a.Id == actifId);
 
-            if (actif == null || actif.Produit == null || actif.Produit.MTBF == null) return null;
+            if (actif == null || actif.Produit == null || actif.Produit.MTBF == null || actif.Produit.MTBF.Value == 0) return null;
 
             var mtbf = actif.Produit.MTBF.Value;
 
@@ -47,57 +47,94 @@ namespace AM_PME_ASP_API.Repositories.Imp
             return dateDerniereMaintenance.Add(periodeMaintenance);
         }
 
+
         public DateTime? CalculerFinGarantie(int actifId)
         {
             var actif = _db.Actifs
                     .Include(a => a.Produit)
-                    .FirstOrDefault(a => a.Id == actifId);
+                    .SingleOrDefault(a => a.Id == actifId);
 
-            var dateRecu = actif?.DateRecu ?? DateTime.Today; 
-            var periodeGarantie = actif?.Produit?.PeriodeGarantie ?? 0; 
+            if (actif == null || actif.Produit == null)
+            {
+                throw new ArgumentException($"No asset with ID {actifId} found, or no product associated with the asset.");
+            }
 
-            return dateRecu.AddMonths(periodeGarantie);
+            var receivedDate = actif.DateRecu ?? DateTime.Today;
+            var warrantyPeriod = actif.Produit.PeriodeGarantie;
+
+            return receivedDate.AddMonths(warrantyPeriod);
         }
+
+        //public int? CalculerHeureUtilisation(int actifId)
+        //{
+        //    var actif = _db.Actifs.FirstOrDefault(a => a.Id == actifId);
+
+        //    if (actif == null || actif.Etat != Etat.EnUtilisation)
+        //    {
+        //        return 0;
+        //    }
+
+        //    actif.SetEtat(actif.Etat);
+
+        //    if (actif.IsEnMaintenance)
+        //    {
+        //        actif.HeureUtilisation = 0;
+        //        _db.SaveChanges();
+        //        return 0;
+        //    }
+
+        //    if (actif.Etat == Etat.EnStock)
+        //    {
+        //        return actif.HeureUtilisation;
+        //    }
+
+        //    if (actif.AssignedAt == null)
+        //    {
+        //        return null;
+        //    }
+
+        //    var heureDebutUtilisation = actif.AssignedAt.Value;
+        //    var heureActuelle = DateTime.Now;
+
+        //    var heureUtilisation = (int)heureActuelle.Subtract(heureDebutUtilisation).TotalHours;
+
+        //    actif.HeureUtilisation += heureUtilisation;
+        //    _db.SaveChanges();
+
+        //    return actif.HeureUtilisation;
+        //}
 
 
         public int? CalculerHeureUtilisation(int actifId)
         {
             var actif = _db.Actifs.FirstOrDefault(a => a.Id == actifId);
 
-            if (actif == null || actif.Etat != Etat.EnUtilisation)
+            if (actif == null)
             {
-                return 0;
+                return null;
             }
 
-            actif.SetEtat(actif.Etat);
-
-            if (actif.IsEnMaintenance)
-            {
-                actif.HeureUtilisation = 0;
-                _db.SaveChanges();
-                return 0;
-            }
-
-            if (actif.Etat == Etat.EnStock)
+            if (actif.Etat != Etat.EnUtilisation)
             {
                 return actif.HeureUtilisation;
             }
 
             if (actif.AssignedAt == null)
             {
-                return null; 
+                return actif.HeureUtilisation;
             }
 
+            // Utilisons l'heure actuelle ou l'heure de début de la maintenance comme heure de fin
+            var heureFinUtilisation = actif.Etat == Etat.EnMaintenance && actif.DateChangement != null
+                ? actif.DateChangement.Value
+                : DateTime.Now;
+
             var heureDebutUtilisation = actif.AssignedAt.Value;
-            var heureActuelle = DateTime.Now;
+            var heuresEnUtilisation = (int)heureFinUtilisation.Subtract(heureDebutUtilisation).TotalHours;
 
-            var heureUtilisation = (int)heureActuelle.Subtract(heureDebutUtilisation).TotalHours;
-
-            actif.HeureUtilisation += heureUtilisation;
-            _db.SaveChanges();
-
-            return actif.HeureUtilisation;
+            return actif.HeureUtilisation + heuresEnUtilisation;
         }
+
 
         public DateTime? CalculerDateRecu(int actifId)
         {
@@ -108,7 +145,12 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 return null;
             }
 
-            return actif.UpdatedAt;
+            if (actif.DateRecu != null)
+            {
+                return actif.DateRecu;
+            }
+
+            return actif.CreatedAt;
         }
 
         public DateTime? CalculerInstalledAt(int actifId)
@@ -122,7 +164,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 return null;
             }
 
-            return DateTime.UtcNow;
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
         }
 
         public DateTime? CalculerAssignedAt(int actifId)
@@ -136,7 +178,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 return null;
             }
 
-            return DateTime.UtcNow;
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
         }
 
         public async Task<List<Actif>> GetAllActifs()
@@ -323,6 +365,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 .ToListAsync();
         }
 
+
         public async Task<Actif> CreateActif(Actif actif)
         {
             var httpContext = _httpContextAccessor.HttpContext;
@@ -332,12 +375,18 @@ namespace AM_PME_ASP_API.Repositories.Imp
             }
             var user = await _userManager.GetUserAsync(httpContext.User);
             if (user == null) throw new InvalidOperationException("Unauthorized");
+
             actif.CreatedBy = user.Id;
-            actif.CreatedAt = DateTime.UtcNow;
+            actif.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+
             // Calculate the DateRecu field
             actif.DateRecu = CalculerDateRecu(actif.Id);
 
+            // Set DateAchat to today if not provided
+            actif.DateAchat = actif.DateAchat ?? actif.CreatedAt;
+
             actif.Produit = await _db.Produits.FindAsync(actif.ProduitId);
+
             if (actif.Produit == null)
             {
                 throw new InvalidOperationException("Produit introuvable");
@@ -378,17 +427,18 @@ namespace AM_PME_ASP_API.Repositories.Imp
             var user = await _userManager.GetUserAsync(httpContext.User);
             if (user == null) throw new InvalidOperationException("Unauthorized");
             actif.UpdatedBy = user.Id;
-            actif.UpdatedAt = DateTime.UtcNow;
+            actif.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
 
             var existingActif = _db.Actifs.AsNoTracking().FirstOrDefault(a => a.Id == actif.Id);
-            var lastDateChangement = existingActif?.DateChangement; 
+            var lastDateChangement = existingActif?.DateChangement;
+
             if (existingActif != null && existingActif.Etat != actif.Etat)
             {
-                actif.DateChangement = DateTime.UtcNow;
+                actif.DateChangement = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             }
             else
             {
-                actif.DateChangement = lastDateChangement; 
+                actif.DateChangement = lastDateChangement;
             }
 
             actif.ProchaineMaintenance = CalculerProchaineMaintenance(actif.Id);

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AMPMEASPAPI.Migrations
 {
     [DbContext(typeof(MyDataContext))]
-    [Migration("20230405174442_defaultroles")]
-    partial class defaultroles
+    [Migration("20230705122224_defaultRoles")]
+    partial class defaultRoles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
