@@ -7,8 +7,8 @@ using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace AM_PME_ASP_API.Repositories.Imp
 {
-	public class EmplacementRepository : IEmplacementRepository
-	{
+    public class EmplacementRepository : IEmplacementRepository
+    {
         private readonly MyDataContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<User> _userManager;
@@ -33,7 +33,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
             var user = await _userManager.GetUserAsync(httpContext.User);
             if (user == null) throw new InvalidOperationException("Unauthorized");
             emplacement.CreatedBy = user.Id;
-            emplacement.CreatedAt = DateTime.UtcNow;
+            emplacement.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             _db.Emplacements.Add(emplacement);
             await _db.SaveChangesAsync();
             return emplacement;
@@ -50,10 +50,11 @@ namespace AM_PME_ASP_API.Repositories.Imp
             {
                 throw new ArgumentException($"Emplacement with ID {emplacement.Id} not found or inactive.");
             }
+
             var user = await _userManager.GetUserAsync(httpContext.User);
             if (user == null) throw new InvalidOperationException("Unauthorized");
             emplacement.UpdatedBy = user.Id;
-            emplacement.UpdatedAt = DateTime.UtcNow;
+            emplacement.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             _db.Emplacements.Update(emplacement);
             await _db.SaveChangesAsync();
             return emplacement;
@@ -108,7 +109,6 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 await _db.SaveChangesAsync();
             }
         }
-
     }
 }
 

@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AM_PME_ASP_API.Repositories.Imp
 {
-	public class EmployeRepository : IEmployeRepository
-	{
+    public class EmployeRepository : IEmployeRepository
+    {
         private readonly MyDataContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<User> _userManager;
@@ -32,7 +32,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 throw new InvalidOperationException("Unauthorized");
             }
             employe.CreatedBy = user.Id;
-            employe.CreatedAt = DateTime.UtcNow;
+            employe.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             _db.Employes.Add(employe);
             await _db.SaveChangesAsync();
         }
@@ -50,7 +50,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 throw new InvalidOperationException("Unauthorized");
             }
             employe.UpdatedBy = user.Id;
-            employe.UpdatedAt = DateTime.UtcNow;
+            employe.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             _db.Entry(employe).State = EntityState.Modified;
             await _db.SaveChangesAsync();
         }

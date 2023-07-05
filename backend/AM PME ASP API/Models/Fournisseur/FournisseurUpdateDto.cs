@@ -21,7 +21,7 @@ namespace AM_PME_ASP_API.Models.Fournisseur
         [MaxLength(200, ErrorMessage = "L'adresse ne peut pas dépasser {1} caractères.")]
         public string Adresse { get; set; }
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
     }
 }
 

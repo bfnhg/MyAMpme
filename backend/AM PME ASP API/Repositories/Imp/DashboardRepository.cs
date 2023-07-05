@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AM_PME_ASP_API.Repositories.Imp
 {
-	public class DashboardRepository : IDashboardRepository
-	{
+    public class DashboardRepository : IDashboardRepository
+    {
         private readonly MyDataContext _db;
 
         public DashboardRepository(MyDataContext db) { _db = db; }
@@ -38,7 +38,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
             return await _db.Employes.CountAsync();
         }
 
-        
+
         public async Task<Dictionary<Etat, int>> GetActifsCountParEtat()
         {
             var actifs = await _db.Actifs
@@ -179,11 +179,6 @@ namespace AM_PME_ASP_API.Repositories.Imp
 
             return agingTable;
         }
-
-
-
-
-
     }
 }
 

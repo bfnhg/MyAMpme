@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AM_PME_ASP_API.Repositories.Imp
 {
-	public class FournisseurRepository : IFournisseurRepository
+    public class FournisseurRepository : IFournisseurRepository
     {
         private readonly MyDataContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -40,7 +40,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 throw new InvalidOperationException("Unauthorized");
             }
             fournisseur.CreatedBy = user.Id;
-            fournisseur.CreatedAt = DateTime.UtcNow;
+            fournisseur.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             await _db.Fournisseurs.AddAsync(fournisseur);
             await _db.SaveChangesAsync();
         }
@@ -59,7 +59,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 throw new InvalidOperationException("Unauthorized");
             }
             fournisseur.UpdatedBy = user.Id;
-            fournisseur.UpdatedAt = DateTime.UtcNow;
+            fournisseur.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             _db.Fournisseurs.Update(fournisseur);
             await _db.SaveChangesAsync();
         }

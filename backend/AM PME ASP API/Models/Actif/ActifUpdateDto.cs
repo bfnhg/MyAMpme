@@ -21,7 +21,8 @@ namespace AM_PME_ASP_API.Models.Actif
         public Etat Etat { get; set; }
         public DateTime? DateChangement { get; set; }
         public string? NumBonCommande { get; set; }
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DateAchat { get; set; }
+        public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
     }
 }
 

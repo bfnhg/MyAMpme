@@ -15,8 +15,7 @@ namespace AM_PME_ASP_API.Models.Produit
         public DateTime? FinSupport { get; set; }
         public DateTime? FinVie { get; set; }
         public decimal? MTBF { get; set; }
-
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
     }
 }
 
