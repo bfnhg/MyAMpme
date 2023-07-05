@@ -30,11 +30,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from 'src/store'
 import { useSettings } from 'src/@core/hooks/useSettings'
 
-
 // ** Styled Components
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import TableHeader from 'src/views/apps/actif/list/TableHeader'
-import {  deleteActif, fetchData } from 'src/store/apps/actif'
+import { deleteActif, fetchData } from 'src/store/apps/actif'
 import { ActifType } from 'src/types/apps/actifTypes'
 import { Etat, EtatColor } from 'src/types/apps/Etat'
 import { exportExcel } from 'src/utils/exportExcel'
@@ -43,9 +42,6 @@ import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
 import { set } from 'nprogress'
-
-
-
 
 interface CustomInputProps {
   dates: Date[]
@@ -65,49 +61,48 @@ const StyledLink = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main
 }))
 
-const etatColor ={
+const etatColor = {
   'In Stock': 'primary',
   'In Order': 'warning',
   'In Maintenance': 'error',
   'In Use': 'success',
-  'Retired': 'info',
-  'Dispose': 'secondary'
+  Retired: 'info',
+  Dispose: 'secondary'
 }
 type etatType = 'In Stock' | 'In Order' | 'In Maintenance' | 'In Use' | 'Retired' | 'Dispose'
 type etatColorType = 'primary' | 'warning' | 'error' | 'success' | 'info' | 'secondary'
 
-
-const formatDate = (date:Date) => {
+const formatDate = (date: Date) => {
   try {
     const d = new Date(date)
-    if(d.getFullYear()==1){
+    if (d.getFullYear() == 1) {
       return 'N/A'
     }
 
     return format(new Date(date), 'dd/MM/yyyy')
-  }catch(e){
+  } catch (e) {
     return 'N/A'
   }
 }
-const formatDateTime = (date:Date) => {
+const formatDateTime = (date: Date) => {
   try {
     const d = new Date(date)
-    if(d.getFullYear()==1){
+    if (d.getFullYear() == 1) {
       return 'N/A'
     }
 
     return format(new Date(date), 'dd/MM/yyyy HH:mm:ss')
-  }catch(e){
+  } catch (e) {
     return 'N/A'
   }
 }
 
-const  CustomToolbar = ()=> {
+const CustomToolbar = () => {
   return (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
     </GridToolbarContainer>
-  );
+  )
 }
 
 /* eslint-disable */
@@ -131,296 +126,352 @@ const ActifList = () => {
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
   const { settings, saveSettings } = useSettings()
   const [visibilityModel, setVisibilityModel] = useState<any>(settings.actifColumnVisibilityModel)
-const ability = useContext(AbilityContext)
-const [selectedRow, setSelectedRow] = useState<any>(null)
-const [deleteDialog, setDeleteDialog] = useState(false)
-const {t,i18n}  = useTranslation()
-const allColumns=[
-  {
-    minWidth: 100,
-    flex: 0.1,
-    field: 'id',
-    headerName: '#',
-    renderCell: ({ row }: CellType) => <StyledLink href={`/apps/actif/preview/${row.id}`}>{`#${row.id}`}</StyledLink>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'etiquette',
-    headerName: 'Tag',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.etiquette??'N/A'}`}</Typography>
-  },
-   {
-    minWidth: 200,
-    flex: 0.15,
-    field: 'nom',
-    headerName: 'Name',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.nom}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'numeroSerie',
-    headerName: 'Serial Number',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numeroSerie}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'assignedTo',
-    headerName: 'Assigned To',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.assignedTo!=null && row.assignedTo.id!=0?row.assignedTo.fullName:'N/A'}`}</Typography>
-  },
-   {
-    minWidth: 150    ,
-    flex: 0.15,
-    field: 'groupeSupport',
-    headerName: 'Support Group',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.groupe??'N/A'}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'nomModel',
-    headerName: 'Model Name',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.nomModele??'N/A'}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'modelNumber',
-    headerName: 'Model Number',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.numeroModele??'N/A'}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'class',
-    headerName: 'Class',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.classe??'N/A'}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'cost',
-    headerName: 'Cost',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.coutAcquisition??'N/A'}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'dateChangementEtat',
-    headerName: 'State Change Date',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${formatDateTime(row.dateChangement)}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'numBonCommande',
-    headerName: 'Order Number',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.numBonCommande}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'manufacturer',
-    headerName: 'Manufacturer',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.manufacturier??'N/A'}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'mtbf',
-    headerName: 'MTBF',
-    renderCell : ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.mtbf??'N/A'}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'finSupport',
-    headerName: 'End of Support',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.produit.finSupport)}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'finVie',
-    headerName: 'End of Life',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.produit.finVie)}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'etat',
-    headerName: 'State',
+  const ability = useContext(AbilityContext)
+  const [selectedRow, setSelectedRow] = useState<any>(null)
+  const [deleteDialog, setDeleteDialog] = useState(false)
+  const { t, i18n } = useTranslation()
+  const allColumns = [
+    {
+      minWidth: 100,
+      flex: 0.1,
+      field: 'id',
+      headerName: '#',
+      renderCell: ({ row }: CellType) => <StyledLink href={`/apps/actif/preview/${row.id}`}>{`#${row.id}`}</StyledLink>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'etiquette',
+      headerName: 'Tag',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.etiquette ?? 'N/A'}`}</Typography>
+    },
+    {
+      minWidth: 200,
+      flex: 0.15,
+      field: 'nom',
+      headerName: 'Name',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.nom}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'numeroSerie',
+      headerName: 'Serial Number',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numeroSerie}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'assignedTo',
+      headerName: 'Assigned To',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${
+          row.assignedTo != null && row.assignedTo.id != 0 ? row.assignedTo.fullName : 'N/A'
+        }`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'groupeSupport',
+      headerName: 'Support Group',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.groupe ?? 'N/A'}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'nomModel',
+      headerName: 'Model Name',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.nomModele ?? 'N/A'}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'modelNumber',
+      headerName: 'Model Number',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row.produit.numeroModele ?? 'N/A'}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'class',
+      headerName: 'Class',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.classe ?? 'N/A'}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'cost',
+      headerName: 'Cost',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row.produit.coutAcquisition ?? 'N/A'}`}</Typography>
+      )
+    },
+     {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'periodeGarantie',
+      headerName: 'Warranty period',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row.produit.periodeGarantie ?? 'N/A'}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'dateChangementEtat',
+      headerName: 'State Change Date',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${formatDateTime(row.dateChangement)}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'numBonCommande',
+      headerName: 'Order Number',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numBonCommande}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'manufacturer',
+      headerName: 'Manufacturer',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row.produit.manufacturier ?? 'N/A'}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'mtbf',
+      headerName: 'MTBF',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.produit.mtbf ?? 'N/A'}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'finSupport',
+      headerName: 'End of Support',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${formatDate(row.produit.finSupport)}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'finVie',
+      headerName: 'End of Life',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.produit.finVie)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'etat',
+      headerName: 'State',
 
-    //@ts-ignore
-    renderCell: ({ row }: CellType) => <CustomChip label={t(Etat[row.etat])} skin='light' color={EtatColor[row.etat]} />
-     
-    
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'createdAt',
-    headerName: 'Created At',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDateTime(row.createdAt)}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'createdBy',
-    headerName: 'Created By',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.user? row.user.fullName:'N/A'}`}</Typography>
-  },
+      
+      renderCell: ({ row }: CellType) => (
 
+        //@ts-ignore
+        <CustomChip label={t(Etat[row.etat])} skin='light' color={EtatColor[row.etat]} />
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'createdAt',
+      headerName: 'Created At',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDateTime(row.createdAt)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'createdBy',
+      headerName: 'Created By',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row.user ? row.user.fullName : 'N/A'}`}</Typography>
+      )
+    },
 
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'gerePar',
-    headerName: 'Managed By',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.managedBy!=null && row.managedBy.id!=0?row.managedBy.fullName:'N/A'}`}</Typography>
-  }, 
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'dateAchat',
-    headerName: 'Purchase Date',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.dateAchat)}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'proprietede',
-    headerName: 'Owned By',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.ownedBy!=null && row.ownedBy.id!=0?row.ownedBy.fullName:'N/A'}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'updatedAt',
-    headerName: 'Updated At',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDateTime(row.updatedAt)}`}</Typography>
-  },{
-    minWidth: 150,
-    flex: 0.15,
-    field: 'updatedBy',
-    headerName: 'Updated By',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.updater? row.updater.fullName:'N/A'}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'assignedAt',
-    headerName: 'Assigned At',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.assignedAt)}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'prochaineMaintenance',
-    headerName: 'Next Maintenance',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.prochaineMaintenance)}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'dateRecu',
-    headerName: 'Received At',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.dateRecu)}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'installedAt',
-    headerName: 'Installed At',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row?.installedAt ? formatDate(row.installedAt):'N/A'}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'finGarantie',
-    headerName: 'Warranty End',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.finGarantie)}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'heureUtilisation',
-    headerName: 'Usage Time',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.heureUtilisation} h`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'emplacement',
-    headerName: 'Location',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.emplacement!=null && row.emplacement.id!=0?row.emplacement.nomEmp:'N/A'}`}</Typography>
-  },
-   {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'fonction',
-    headerName: 'Function',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.fonction??'N/A'}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'fournisseur',
-    headerName: 'Supplier',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.fournisseur!= null && row.fournisseur.id !=0 ? row.fournisseur.name:'N/A'}`}</Typography>
-  },
-  {
-    minWidth: 150,
-    flex: 0.15,
-    field: 'maintenanceEffectueLe',
-    headerName: 'Maintenance Done At',
-    type:'date',
-    valueGetter: ({ value }) => value && new Date(value),
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row?.maintenanceEffectueLe? formatDate(row.maintenanceEffectueLe):'N/A'}`}</Typography>
-  },
- 
-
-
-]
-const updatedColumns = allColumns.map(column => {
-  return {
-    ...column,
-    headerName: t(`${column.headerName}`)
-  };
-});
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'gerePar',
+      headerName: 'Managed By',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${
+          row.managedBy != null && row.managedBy.id != 0 ? row.managedBy.fullName : 'N/A'
+        }`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'dateAchat',
+      headerName: 'Purchase Date',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.dateAchat)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'proprietede',
+      headerName: 'Owned By',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${
+          row.ownedBy != null && row.ownedBy.id != 0 ? row.ownedBy.fullName : 'N/A'
+        }`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'updatedAt',
+      headerName: 'Updated At',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDateTime(row.updatedAt)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'updatedBy',
+      headerName: 'Updated By',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row.updater ? row.updater.fullName : 'N/A'}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'assignedAt',
+      headerName: 'Assigned At',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.assignedAt)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'prochaineMaintenance',
+      headerName: 'Next Maintenance',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${formatDate(row.prochaineMaintenance)}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'dateRecu',
+      headerName: 'Received At',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.dateRecu)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'installedAt',
+      headerName: 'Installed At',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${row?.installedAt ? formatDate(row.installedAt) : 'N/A'}`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'finGarantie',
+      headerName: 'Warranty End',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${formatDate(row.finGarantie)}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'heureUtilisation',
+      headerName: 'Usage Time',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.heureUtilisation} h`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'emplacement',
+      headerName: 'Location',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${
+          row.emplacement != null && row.emplacement.id != 0 ? row.emplacement.nomEmp : 'N/A'
+        }`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'fonction',
+      headerName: 'Function',
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.fonction ?? 'N/A'}`}</Typography>
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'fournisseur',
+      headerName: 'Supplier',
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${
+          row.fournisseur != null && row.fournisseur.id != 0 ? row.fournisseur.name : 'N/A'
+        }`}</Typography>
+      )
+    },
+    {
+      minWidth: 150,
+      flex: 0.15,
+      field: 'maintenanceEffectueLe',
+      headerName: 'Maintenance Done At',
+      type: 'date',
+      valueGetter: ({ value }) => value && new Date(value),
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${
+          row?.maintenanceEffectueLe ? formatDate(row.maintenanceEffectueLe) : 'N/A'
+        }`}</Typography>
+      )
+    }
+  ]
+  const updatedColumns = allColumns.map(column => {
+    return {
+      ...column,
+      headerName: t(`${column.headerName}`)
+    }
+  })
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
   const store = useSelector((state: RootState) => state.actif)
-const headers = {};
-allColumns.forEach(column => {
-  headers[column.headerName] = '';
-});
+  const headers = {}
+  allColumns.forEach(column => {
+    headers[column.headerName] = ''
+  })
 
-useEffect(() => {
-  
-  dispatch(
-    fetchData({
-      q: ''
-    })
-  )
-}, [dispatch])
-
+  useEffect(() => {
+    dispatch(
+      fetchData({
+        q: ''
+      })
+    )
+  }, [dispatch])
 
   const handleFilter = (val: string) => {
     dispatch(
@@ -431,10 +482,7 @@ useEffect(() => {
     setCurrentQuery(val)
   }
 
-  
-
-
-  const columns  =[
+  const columns = [
     ...updatedColumns,
     {
       flex: 0.1,
@@ -449,72 +497,73 @@ useEffect(() => {
               <Icon icon='mdi:eye-outline' fontSize={20} />
             </IconButton>
           </Tooltip>
-         {
-            ability.can('delete', 'actif') &&  <Tooltip title={t('Delete')}>
-            <IconButton size='small'
-            onClick={()=>{
-              setSelectedRow(row.id)
-              setDeleteDialog(true)
-            }}
-            >
-              <Icon icon='mdi:delete-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-         }
-          {
-            ability.can('update', 'actif') &&  <Tooltip title={t('Edit')}>
-            <IconButton size='small' component={Link} href={`/apps/actif/edit/${row.id}`}>
-              <Icon icon='mdi:pencil-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-          }
-         
+          {ability.can('delete', 'actif') && (
+            <Tooltip title={t('Delete')}>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  setSelectedRow(row.id)
+                  setDeleteDialog(true)
+                }}
+              >
+                <Icon icon='mdi:delete-outline' fontSize={20} />
+              </IconButton>
+            </Tooltip>
+          )}
+          {ability.can('update', 'actif') && (
+            <Tooltip title={t('Edit')}>
+              <IconButton size='small' component={Link} href={`/apps/actif/edit/${row.id}`}>
+                <Icon icon='mdi:pencil-outline' fontSize={20} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       )
-    }]
-  
+    }
+  ]
+
   const exportXlsx = () => {
     let ids = [...selectedRows]
-    if(ids.length==0){
+    if (ids.length == 0) {
       ids = store.data.map((item: any) => item.id)
     }
 
-    const exportData = store.data.filter((item: any) => ids.includes(item.id)).map((item: any) => {
-      return {
-        id: item.id,
-        etiquette: item.etiquette,
-        nom: item.nom,
-        numeroSerie: item.numeroSerie,
-        assignedTo: item.assignedTo? item.assignedTo.nom:'N/A',
-        gerePar: item.gerePar? item.gerePar.nom:'N/A',
-        proprietede: item.proprietede? item.proprietede.nom:'N/A',
-        updatedAt: item.updatedAt? formatDate(item.updatedAt):'N/A',
-        assignedAt: item.assignedAt? formatDate(item.assignedAt):'N/A',
-        prochaineMaintenance: item.prochaineMaintenance? formatDate(item.prochaineMaintenance):'N/A',
-        dateRecu: item.dateRecu? formatDate(item.dateRecu):'N/A',
-        finGarantie: item.finGarantie? formatDate(item.finGarantie):'N/A',
-        heureUtilisation: item.heureUtilisation,
-        emplacement: item.emplacement? item.emplacement.nomEmp:'N/A',
-        fonction: item.fonction,
-        fournisseur: item.fournisseur? item.fournisseur.name:'N/A',
-        maintenanceEffectueLe: item.maintenanceEffectueLe? formatDate(item.maintenanceEffectueLe):'N/A',
-        groupeSupport: item.groupeSupport? item.groupeSupport.nom:'N/A',
-        createdAt: item.createdAt? formatDate(item.createdAt):'N/A',
-        etat: Etat[item.etat],
-        installedAt: item.installedAt? formatDate(item.installedAt):'N/A',
-        nomModel: item.produit.nomModele??'N/A',
-        class: item.produit.classe??'N/A',
-        cost: item.produit.coutAcquisition??'N/A',
-        manufacturer: item.produit.manufacturier??'N/A',
-        mtbf: item.produit.mtbf??'N/A',
-        finVie: item.produit.finVie? formatDate(item.produit.finVie):'N/A',
-        finSupport: item.produit.finSupport? formatDate(item.produit.finSupport):'N/A',
+    const exportData = store.data
+      .filter((item: any) => ids.includes(item.id))
+      .map((item: any) => {
+        return {
+          id: item.id,
+          etiquette: item.etiquette,
+          nom: item.nom,
+          numeroSerie: item.numeroSerie,
+          assignedTo: item.assignedTo ? item.assignedTo.nom : 'N/A',
+          gerePar: item.gerePar ? item.gerePar.nom : 'N/A',
+          proprietede: item.proprietede ? item.proprietede.nom : 'N/A',
+          updatedAt: item.updatedAt ? formatDate(item.updatedAt) : 'N/A',
+          assignedAt: item.assignedAt ? formatDate(item.assignedAt) : 'N/A',
+          prochaineMaintenance: item.prochaineMaintenance ? formatDate(item.prochaineMaintenance) : 'N/A',
+          dateRecu: item.dateRecu ? formatDate(item.dateRecu) : 'N/A',
+          finGarantie: item.finGarantie ? formatDate(item.finGarantie) : 'N/A',
+          heureUtilisation: item.heureUtilisation,
+          emplacement: item.emplacement ? item.emplacement.nomEmp : 'N/A',
+          fonction: item.fonction,
+          fournisseur: item.fournisseur ? item.fournisseur.name : 'N/A',
+          maintenanceEffectueLe: item.maintenanceEffectueLe ? formatDate(item.maintenanceEffectueLe) : 'N/A',
+          groupeSupport: item.groupeSupport ? item.groupeSupport.nom : 'N/A',
+          createdAt: item.createdAt ? formatDate(item.createdAt) : 'N/A',
+          etat: Etat[item.etat],
+          installedAt: item.installedAt ? formatDate(item.installedAt) : 'N/A',
+          nomModel: item.produit.nomModele ?? 'N/A',
+          class: item.produit.classe ?? 'N/A',
+          cost: item.produit.coutAcquisition ?? 'N/A',
+          manufacturer: item.produit.manufacturier ?? 'N/A',
+          mtbf: item.produit.mtbf ?? 'N/A',
+          finVie: item.produit.finVie ? formatDate(item.produit.finVie) : 'N/A',
+          finSupport: item.produit.finSupport ? formatDate(item.produit.finSupport) : 'N/A'
 
-        // product: item.produit? `${item.produit.nomModele} ${item.produit.numeroModele}`:'N/A',
-
-
-      }
-    })
+          // product: item.produit? `${item.produit.nomModele} ${item.produit.numeroModele}`:'N/A',
+        }
+      })
 
     //get all columns
     const allColumns = columns.map((item: any) => item.field)
@@ -530,48 +579,40 @@ useEffect(() => {
       return acc
     }, {})
 
-    exportExcel(updatedVisibilityModel,exportData, 'Actif')
+    exportExcel(updatedVisibilityModel, exportData, 'Actif')
   }
-   const deleteActif = (id) => {
+  const deleteActif = id => {
     return new Promise(async (resolve, reject) => {
-      await http.delete(`Actifs/${id}`).then((res) => {
-        dispatch(
-          fetchData({
-            q: currentQuery
-          })
-        )
-        resolve(res)
-      }).catch((err) => {
-        reject(err)
-      }
-      )
+      await http
+        .delete(`Actifs/${id}`)
+        .then(res => {
+          dispatch(
+            fetchData({
+              q: currentQuery
+            })
+          )
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 
-
   return (
     <DatePickerWrapper>
-      <DeleteDialog
-        open={deleteDialog}
-        setOpen={setDeleteDialog}
-        deelete={deleteActif}
-        rowId={selectedRow}
-      />
+      <DeleteDialog open={deleteDialog} setOpen={setDeleteDialog} deelete={deleteActif} rowId={selectedRow} />
       <Grid container spacing={6}>
-        
         <Grid item xs={12}>
           <Card>
-            <TableHeader 
-            exportXlsx={exportXlsx}
-            selectedRows={selectedRows} handleFilter={handleFilter} />
-            
+            <TableHeader exportXlsx={exportXlsx} selectedRows={selectedRows} handleFilter={handleFilter} />
+
             <DataGrid
-            initialState={{
-              columns:{
-                columnVisibilityModel:visibilityModel
-              }
-            }}
-            
+              initialState={{
+                columns: {
+                  columnVisibilityModel: visibilityModel
+                }
+              }}
               autoHeight
               pagination
               rows={store.data}
@@ -584,13 +625,13 @@ useEffect(() => {
               rowsPerPageOptions={[10, 25, 50]}
               onSelectionModelChange={rows => setSelectedRows(rows)}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
-              onColumnVisibilityModelChange={(model)=>{
+              onColumnVisibilityModelChange={model => {
                 setVisibilityModel(model)
 
-                saveSettings({...settings,actifColumnVisibilityModel:model})
+                saveSettings({ ...settings, actifColumnVisibilityModel: model })
               }}
               components={{
-                Toolbar: CustomToolbar,
+                Toolbar: CustomToolbar
               }}
               localeText={i18n.language === 'fr' ? frFR.components.MuiDataGrid.defaultProps.localeText : {}}
             />
@@ -602,7 +643,8 @@ useEffect(() => {
 }
 
 ActifList.acl = {
-  subject : 'actif',
-  action: 'read'}
+  subject: 'actif',
+  action: 'read'
+}
 
 export default ActifList
