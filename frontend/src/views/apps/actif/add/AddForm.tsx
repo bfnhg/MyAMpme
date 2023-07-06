@@ -69,7 +69,9 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
   const schema = yup.object().shape({
     etiquette: yup.string(),
     etat: yup.number(),
-    numeroSerie: yup.string(),
+    numeroSerie: yup.string().when('etat', (etat : number, schema) => {
+        return etat !== Etat['In Order'] ? schema.required(t('Serial Number is required')) : schema
+    }),
     fonction: yup.string(),
     assignedTo: yup.string(),
     emplacement: yup.string(),
@@ -79,6 +81,7 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
     proprietede: yup.string(),
     numBonCommande: yup.string(),
     dateAchat: yup.date().nullable(),
+    dateRecu: yup.date().nullable()
   })
   const defaultValues = {
    etiquette: '',
@@ -92,7 +95,8 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
     gerePar: '',
     proprietede: '',
     numBonCommande: '',
-    dateAchat: null
+    dateAchat: null,
+    dateRecu: null
   }
   const {
     reset,
@@ -124,7 +128,8 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
       emplacementId: data.emplacement!==''?parseInt(data.emplacement):null,
       fournisseurId: data.fournisseur!==''?parseInt(data.fournisseur):null,
       numBonCommande: data.numBonCommande!==''?data.numBonCommande:null,
-      dateAchat: data.dateAchat!==null?data.dateAchat:null
+      dateAchat: data.dateAchat!==null?data.dateAchat:null,
+      dateRecu: data.dateRecu!==null?data.dateRecu:null
       
     }
     http.post(process.env.NEXT_PUBLIC_SERVER_URL+classNames.actif, dataToSubmit).then(res=>{
@@ -617,6 +622,28 @@ const AddForm = forwardRef((props: AddFormProps, ref) => {
               />
 
               {errors.dateAchat && <FormHelperText sx={{ color: 'error.main' }}>{errors.dateAchat.message}</FormHelperText>}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <Controller
+                name='dateRecu'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange } }) => (
+                  <DatePicker
+                    showYearDropdown
+                    showMonthDropdown
+                    selected={value}
+                    id='dateRecu'
+                    placeholderText='MM-DD-YYYY'
+                    onChange={onChange}
+                    customInput={<CustomInput fullWidth error={Boolean(errors.dateRecu)} label={t('Received At')} />}
+                  />
+                )}
+              />
+
+              {errors.dateRecu && <FormHelperText sx={{ color: 'error.main' }}>{errors.dateRecu.message}</FormHelperText>}
             </FormControl>
           </Grid>
           </Grid>
