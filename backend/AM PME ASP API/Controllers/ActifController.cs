@@ -3,7 +3,6 @@ using AM_PME_ASP_API.Repositories;
 using AM_PME_ASP_API.Entities;
 using AM_PME_ASP_API.Repositories.Imp;
 using AutoMapper;
-using MySql.Data.MySqlClient;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using AM_PME_ASP_API.Params;
