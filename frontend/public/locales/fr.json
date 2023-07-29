@@ -174,5 +174,6 @@
 "Minimum 8 characters long, uppercase & symbol":"Au moins 8 caractères, majuscules et symbole",
 "New Password":"Nouveau mot de passe",
 "Confirm New Password":"Confirmer le nouveau mot de passe",
-"Change Password":"Changer le mot de passe"
+"Change Password":"Changer le mot de passe",
+"Failed to export data":"Échec de l'exportation des données"
 }

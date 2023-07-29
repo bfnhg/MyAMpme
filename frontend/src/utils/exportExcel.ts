@@ -1,32 +1,23 @@
-import { GridColumnVisibilityModel } from '@mui/x-data-grid'
-import * as ExcelJS from 'exceljs'
+import { http } from 'src/global/http'
 
-export const exportExcel = async (columns: GridColumnVisibilityModel, data: any, filename: string) => {
-  const workbook = new ExcelJS.Workbook()
-  const worksheet = workbook.addWorksheet('Sheet1')
-
-  //remove key actions if exists
-  if (columns.actions) delete columns.actions
-
-  // for every key in columns, if value is true, add to worksheet.columns
-  worksheet.columns = Object.keys(columns)
-    .filter(key => columns[key])
-    .map(key => ({ header: key, key, width: 30 }))
-
-  // add data to worksheet
-  worksheet.addRows(data)
-
-  const buffer = await workbook.xlsx.writeBuffer()
-
-  download(buffer, filename)
+type ExportType = 'asset' | 'product' | 'location' | 'employee' | 'supplier'
+enum apiEndpoint {
+  asset = 'ExportDatas/export-actifs',
+  product = 'ExportDatas/export-produits',
+  location = 'ExportDatas/export-emplacements',
+  employee = 'ExportDatas/export-employes',
+  supplier = 'ExportDatas/export-fournisseurs'
 }
 
-const download = (buffer: any, filename: string) => {
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-  const url = window.URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${filename}.xlsx`
-  a.click()
-  window.URL.revokeObjectURL(url)
+export const exportExcel = (type: ExportType, fields: string[], fileName: string) => {
+  const endpoint = apiEndpoint[type]
+
+  return http.post(endpoint, { fields, fileName }, { responseType: 'blob' }).then(({ data }) => {
+    const url = window.URL.createObjectURL(new Blob([data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${fileName}.xlsx`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  })
 }

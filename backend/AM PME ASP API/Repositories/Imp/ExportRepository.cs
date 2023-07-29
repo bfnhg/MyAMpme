@@ -8,11 +8,122 @@ using OfficeOpenXml;
 
 namespace AM_PME_ASP_API.Repositories.Imp
 {
-	public class ExportRepository : IExportRepository
-	{
+    public class ExportRepository : IExportRepository
+    {
         private readonly MyDataContext _db;
 
         public ExportRepository(MyDataContext db) { _db = db; }
+
+        private static readonly Dictionary<string, Func<Actif, object>> actifFieldSelectors = new Dictionary<string, Func<Actif, object>>
+{
+    {"id", actif => actif.Id},
+    {"etiquette", actif => actif.Etiquette},
+    {"nom", actif => actif.Nom},
+    {"numeroSerie", actif => actif.NumeroSerie},
+    {"assignedTo", actif => actif.AssignedTo?.FullName},
+    {"groupeSupport", actif => actif.Groupe},
+    {"nomModel", actif => actif.Produit?.NomModele},
+    {"modelNumber", actif => actif.Produit?.NumeroModele},
+    {"class", actif => actif.Produit?.Classe},
+    {"cost", actif => actif.Produit?.CoutAcquisition},
+    {"periodeGarantie", actif => actif.Produit?.PeriodeGarantie},
+    {"dateChangementEtat", actif => actif.DateChangement?.ToString("dd/MM/yyyy HH:mm")},
+    {"numBonCommande", actif => actif.NumBonCommande},
+    {"manufacturer", actif => actif.Produit?.Manufacturier},
+    {"mtbf", actif => actif.Produit?.MTBF},
+    {"finSupport", actif => actif.Produit?.FinSupport?.ToString("dd/MM/yyyy HH:mm")},
+    {"finVie", actif => actif.Produit?.FinVie?.ToString("dd/MM/yyyy HH:mm")},
+    {"etat", actif => actif.Etat},
+    {"createdAt", actif => actif.CreatedAt.ToString("dd/MM/yyyy HH:mm")},
+    {"createdBy", actif => actif.User?.FullName},
+    {"gerePar", actif => actif.ManagedBy?.FullName},
+    {"dateAchat", actif => actif.DateAchat?.ToString("dd/MM/yyyy HH:mm")},
+    {"proprietede", actif => actif.OwnedBy?.FullName},
+    {"updatedAt", actif => actif.UpdatedAt.ToString("dd/MM/yyyy HH:mm")},
+    {"updatedBy", actif => actif.Updater?.FullName},
+    {"assignedAt", actif => actif.AssignedAt?.ToString("dd/MM/yyyy HH:mm")},
+    {"prochaineMaintenance", actif => actif.ProchaineMaintenance?.ToString("dd/MM/yyyy HH:mm")},
+    {"dateRecu", actif => actif.DateRecu?.ToString("dd/MM/yyyy HH:mm")},
+    {"installedAt", actif => actif.InstalledAt?.ToString("dd/MM/yyyy HH:mm")},
+    {"finGarantie", actif => actif.FinGarantie?.ToString("dd/MM/yyyy HH:mm")},
+    {"heureUtilisation", actif => actif.HeureUtilisation},
+    {"emplacement", actif => actif.Emplacement?.NomEmp},
+    {"fonction", actif => actif.Fonction},
+    {"fournisseur", actif => actif.Fournisseur?.Name},
+    {"maintenanceEffectueLe", actif => actif.MaintenanceEffectueLe?.ToString("dd/MM/yyyy HH:mm")}
+};
+        private static readonly Dictionary<string, string> actifFieldDisplayNames = new Dictionary<string, string>
+{
+    {"id", "ID"},
+    {"etiquette", "Étiquette"},
+    {"nom", "Nom"},
+    {"numeroSerie", "Numéro de série"},
+    {"assignedTo", "Affecté à"},
+    {"groupeSupport", "Groupe de support"},
+    {"nomModel", "Nom du modèle"},
+    {"modelNumber", "Numéro de modèle"},
+    {"class", "Classe"},
+    {"cost", "Coût"},
+    {"periodeGarantie", "Période de garantie"},
+    {"dateChangementEtat", "Date de changement d'état"},
+    {"numBonCommande", "Numéro de commande"},
+    {"manufacturer", "Manufacturier"},
+    {"mtbf", "MTBF"},
+    {"finSupport", "Fin du support"},
+    {"finVie", "Fin de vie"},
+    {"etat", "État"},
+    {"createdAt", "Créé le"},
+    {"createdBy", "Créé par"},
+    {"gerePar", "Géré par"},
+    {"dateAchat", "Date d'achat"},
+    {"proprietede", "Propriété de"},
+    {"updatedAt", "Mis à jour le"},
+    {"updatedBy", "Mis à jour par"},
+    {"assignedAt", "Affecté le"},
+    {"prochaineMaintenance", "Prochaine maintenance"},
+    {"dateRecu", "Reçu le"},
+    {"installedAt", "Installé le"},
+    {"finGarantie", "Fin de garantie"},
+    {"heureUtilisation", "Durée d'utilisation"},
+    {"emplacement", "Emplacement"},
+    {"fonction", "Fonction"},
+    {"fournisseur", "Fournisseur"},
+    {"maintenanceEffectueLe", "Maintenance effectuée le"}
+};
+        private static readonly Dictionary<string, Func<Produit, object>> produitFieldSelectors = new Dictionary<string, Func<Produit, object>>
+{
+    {"nomModele", produit => produit.NomModele},
+    {"numeroModele", produit => produit.NumeroModele},
+    {"classe", produit => produit.Classe},
+    {"coutAcquisition", produit => produit.CoutAcquisition},
+    {"mtbf", produit => produit.MTBF},
+    {"finSupport", produit => produit.FinSupport?.ToString("dd/MM/yyyy HH:mm")},
+    {"finVie", produit => produit.FinVie?.ToString("dd/MM/yyyy HH:mm")},
+    {"createdAt", produit => produit.CreatedAt.ToString("dd/MM/yyyy HH:mm")},
+    {"createdBy", produit => produit.Creator?.FullName},
+    {"updatedAt", produit => produit.UpdatedAt.ToString("dd/MM/yyyy HH:mm")},
+    {"updatedBy", produit => produit.Updater?.FullName},
+    {"periodeGarantie", produit => produit.PeriodeGarantie},
+    {"manufacturier", produit => produit.Manufacturier}
+};
+
+        private static readonly Dictionary<string, string> produitFieldDisplayNames = new Dictionary<string, string>
+{
+    {"nomModele", "Nom du modèle"},
+    {"numeroModele", "Numéro de modèle"},
+    {"classe", "Classe"},
+    {"coutAcquisition", "Coût"},
+    {"mtbf", "MTBF"},
+    {"finSupport", "Fin du support"},
+    {"finVie", "Fin de vie"},
+    {"createdAt", "Créé le"},
+    {"createdBy", "Créé par"},
+    {"updatedAt", "Mis à jour le"},
+    {"updatedBy", "Mis à jour par"},
+    {"periodeGarantie", "Période de Garantie"},
+    {"manufacturier", "Manufacturier"}
+};
+
 
         public async Task<byte[]> ExportActifDataToExcel(string fileName, List<string> fields)
         {
@@ -30,49 +141,11 @@ namespace AM_PME_ASP_API.Repositories.Imp
                                                 .Include(a => a.Emplacement)
                                                 .ToListAsync();
 
-                if(fields.Count == 0)
-                {
-                    fields = new List<string>
-                    {
-                       "Étiquette",
-                        "Nom",
-                        "Numéro de série",
-                        "Affecté à",
-                        "Groupe de support",
-                        "Nom du modèle",
-                        "Numéro de modèle",
-                        "Classe",
-                        "Coût",
-                        "Date de changement d'état",
-                        "Numéro de commande",
-                        "Fabricant",
-                        "MTBF",
-                        "Fin du support",
-                        "Fin de vie",
-                        "État",
-                        "Créé le",
-                        "Créé par",
-                        "Géré par",
-                        "Date d'achat",
-                        "Possédé par",
-                        "Mis à jour le",
-                        "Mis à jour par",
-                        "Affecté le",
-                        "Prochaine maintenance",
-                        "Reçu le",
-                        "Installé le",
-                        "Fin de garantie",
-                        "Durée d'utilisation",
-                        "Emplacement",
-                        "Fonction",
-                        "Fournisseur",
-                        "Maintenance effectuée le"
-                    };
-                }
-
                 for (int i = 0; i < fields.Count; i++)
                 {
-                    worksheet.Cells[1, i + 1].Value = fields[i];
+                    var field = fields[i];
+                    var displayName = actifFieldDisplayNames.ContainsKey(field) ? actifFieldDisplayNames[field] : field;
+                    worksheet.Cells[1, i + 1].Value = displayName;
                 }
 
                 for (int i = 0; i < actifData.Count; i++)
@@ -83,39 +156,10 @@ namespace AM_PME_ASP_API.Repositories.Imp
                     {
                         var field = fields[j];
 
-                        if (field == "Étiquette") worksheet.Cells[i + 2, j + 1].Value = actif.Etiquette;
-                        else if (field == "Nom") worksheet.Cells[i + 2, j + 1].Value = actif.Nom;
-                        else if (field == "Numéro de série") worksheet.Cells[i + 2, j + 1].Value = actif.NumeroSerie;
-                        else if (field == "Affecté à") worksheet.Cells[i + 2, j + 1].Value = actif.AssignedTo?.FullName;
-                        else if (field == "Groupe de support") worksheet.Cells[i + 2, j + 1].Value = actif.Groupe;
-                        else if (field == "Nom du modèle") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.NomModele;
-                        else if (field == "Numéro de modèle") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.NumeroModele;
-                        else if (field == "Classe") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.Classe;
-                        else if (field == "Coût") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.CoutAcquisition;
-                        else if (field == "Date de changement d'état") worksheet.Cells[i + 2, j + 1].Value = actif.DateChangement;
-                        else if (field == "Numéro de commande") worksheet.Cells[i + 2, j + 1].Value = actif.NumBonCommande;
-                        else if (field == "Fabricant") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.Manufacturier;
-                        else if (field == "MTBF") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.MTBF;
-                        else if (field == "Fin du support") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.FinSupport;
-                        else if (field == "Fin de vie") worksheet.Cells[i + 2, j + 1].Value = actif.Produit?.FinVie;
-                        else if (field == "État") worksheet.Cells[i + 2, j + 1].Value = actif.Etat;
-                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = actif.CreatedAt;
-                        else if (field == "Créé par") worksheet.Cells[i + 2, j + 1].Value = actif.User?.FullName;
-                        else if (field == "Géré par") worksheet.Cells[i + 2, j + 1].Value = actif.ManagedBy?.FullName;
-                        else if (field == "Date d'achat") worksheet.Cells[i + 2, j + 1].Value = actif.DateAchat;
-                        else if (field == "Possédé par") worksheet.Cells[i + 2, j + 1].Value = actif.OwnedBy?.FullName;
-                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = actif.UpdatedAt;
-                        else if (field == "Mis à jour par") worksheet.Cells[i + 2, j + 1].Value = actif.Updater?.FullName;
-                        else if (field == "Affecté le") worksheet.Cells[i + 2, j + 1].Value = actif.AssignedAt;
-                        else if (field == "Prochaine maintenance") worksheet.Cells[i + 2, j + 1].Value = actif.ProchaineMaintenance;
-                        else if (field == "Reçu le") worksheet.Cells[i + 2, j + 1].Value = actif.DateRecu;
-                        else if (field == "Installé le") worksheet.Cells[i + 2, j + 1].Value = actif.InstalledAt;
-                        else if (field == "Fin de garantie") worksheet.Cells[i + 2, j + 1].Value = actif.FinGarantie;
-                        else if (field == "Durée d'utilisation") worksheet.Cells[i + 2, j + 1].Value = actif.HeureUtilisation;
-                        else if (field == "Emplacement") worksheet.Cells[i + 2, j + 1].Value = actif.Emplacement?.NomEmp;
-                        else if (field == "Fonction") worksheet.Cells[i + 2, j + 1].Value = actif.Fonction;
-                        else if (field == "Fournisseur") worksheet.Cells[i + 2, j + 1].Value = actif.Fournisseur?.Name;
-                        else if (field == "Maintenance effectuée le") worksheet.Cells[i + 2, j + 1].Value = actif.MaintenanceEffectueLe;
+                        if (actifFieldSelectors.ContainsKey(field))
+                        {
+                            worksheet.Cells[i + 2, j + 1].Value = actifFieldSelectors[field](actif);
+                        }
                     }
                 }
 
@@ -135,30 +179,11 @@ namespace AM_PME_ASP_API.Repositories.Imp
 
                 var produitData = await _db.Produits.Include(p => p.Updater).Include(p => p.Creator).ToListAsync();
 
-
-                if (fields.Count == 0)
-                {
-                    fields = new List<string>
-                    {
-                        "Nom du modèle",
-                        "Numéro de modèle",
-                        "Classe",
-                        "Coût",
-                        "MTBF",
-                        "Fin du support",
-                        "Fin de vie",
-                        "Créé le",
-                        "Créé par",
-                        "Mis à jour le",
-                        "Mis à jour par",
-                        "Période de Garantie",
-                        "Manufacturier"
-                    };
-                }
-
                 for (int i = 0; i < fields.Count; i++)
                 {
-                    worksheet.Cells[1, i + 1].Value = fields[i];
+                    var field = fields[i];
+                    var displayName = produitFieldDisplayNames.ContainsKey(field) ? produitFieldDisplayNames[field] : field;
+                    worksheet.Cells[1, i + 1].Value = displayName;
                 }
 
                 for (int i = 0; i < produitData.Count; i++)
@@ -169,19 +194,10 @@ namespace AM_PME_ASP_API.Repositories.Imp
                     {
                         var field = fields[j];
 
-                        if (field == "Nom du modèle") worksheet.Cells[i + 2, j + 1].Value = produit.NomModele;
-                        else if (field == "Numéro de modèle") worksheet.Cells[i + 2, j + 1].Value = produit.NumeroModele;
-                        else if (field == "Classe") worksheet.Cells[i + 2, j + 1].Value = produit.Classe;
-                        else if (field == "Coût") worksheet.Cells[i + 2, j + 1].Value = produit.CoutAcquisition;
-                        else if (field == "MTBF") worksheet.Cells[i + 2, j + 1].Value = produit.MTBF;
-                        else if (field == "Fin du support") worksheet.Cells[i + 2, j + 1].Value = produit.FinSupport;
-                        else if (field == "Fin de vie") worksheet.Cells[i + 2, j + 1].Value = produit.FinVie;
-                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = produit.CreatedAt;
-                        else if (field == "Créé par") worksheet.Cells[i + 2, j + 1].Value = produit.Creator?.FullName;
-                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = produit.UpdatedAt;
-                        else if (field == "Mis à jour par") worksheet.Cells[i + 2, j + 1].Value = produit.Updater?.FullName;
-                        else if (field == "Période de Garantie") worksheet.Cells[i + 2, j + 1].Value = produit.PeriodeGarantie;
-                        else if (field == "Manufacturier") worksheet.Cells[i + 2, j + 1].Value = produit.Manufacturier;
+                        if (produitFieldSelectors.ContainsKey(field))
+                        {
+                            worksheet.Cells[i + 2, j + 1].Value = produitFieldSelectors[field](produit);
+                        }
                     }
                 }
 

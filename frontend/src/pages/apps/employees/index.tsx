@@ -41,6 +41,7 @@ import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import Translations from 'src/layouts/components/Translations'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 
 interface CustomInputProps {
   dates: Date[]
@@ -106,8 +107,8 @@ const updatedColumns = defaultColumns.map(column => {
   return {
     ...column,
     headerName: <Translations text={`${column.headerName}`} />
-  };
-});
+  }
+})
 
 const EmployeeList = () => {
   // ** State
@@ -119,13 +120,13 @@ const EmployeeList = () => {
   const [employee, setEmployee] = useState<EmployeeType | undefined>(undefined)
   const [importShow, setImportShow] = useState<boolean>(false)
   const ability = useContext(AbilityContext)
-const [ deleteDialog,setDeleteDialog] = useState<boolean>(false)
-const [selectedRow,setSelectedRow] = useState<any>(null)
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false)
+  const [selectedRow, setSelectedRow] = useState<any>(null)
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
   const store = useSelector((state: RootState) => state.employee)
-  const {i18n} = useTranslation()
+  const { i18n, t } = useTranslation()
   useEffect(() => {
     dispatch(
       fetchData({
@@ -156,106 +157,80 @@ const [selectedRow,setSelectedRow] = useState<any>(null)
 
   const columns = [
     ...updatedColumns,
-    ability.can('update', 'employee') ? {
-      flex: 0.05,
-      minWidth: 130,
-      sortable: false,
-      field: 'actions',
-      headerName: 'Actions',
-      renderCell: ({ row }: CellType) => (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {
-            ability.can('delete', 'employee') && <Tooltip title='Delete'>
-            <IconButton size='small' onClick={() =>
-            
-          {
-            setSelectedRow(row.id)
-            setDeleteDialog(true)
-          }}>
-              <Icon icon='mdi:delete-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-        
-
-          }
-          <Tooltip title='Edit'>
-            <IconButton size='small' onClick={() => handleEdit(row as EmployeeType)}>
-              <Icon icon='mdi:pencil-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      )
-    }:null
+    ability.can('update', 'employee')
+      ? {
+          flex: 0.05,
+          minWidth: 130,
+          sortable: false,
+          field: 'actions',
+          headerName: 'Actions',
+          renderCell: ({ row }: CellType) => (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {ability.can('delete', 'employee') && (
+                <Tooltip title='Delete'>
+                  <IconButton
+                    size='small'
+                    onClick={() => {
+                      setSelectedRow(row.id)
+                      setDeleteDialog(true)
+                    }}
+                  >
+                    <Icon icon='mdi:delete-outline' fontSize={20} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title='Edit'>
+                <IconButton size='small' onClick={() => handleEdit(row as EmployeeType)}>
+                  <Icon icon='mdi:pencil-outline' fontSize={20} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )
+        }
+      : null
   ]
-const removeNullFromColumns = (columns: any) => {
-    return columns.filter((item: any) => item !== null) 
+  const removeNullFromColumns = (columns: any) => {
+    return columns.filter((item: any) => item !== null)
   }
-    const exportXlsx = () => {
-      const visibilityModel = {
-        id: true,
-        fullName : true,
-        email: true,
-        telephone: true,
-        poste: true,
+  const exportXlsx = () => {
+    const fields = defaultColumns.map((item: any) => item.field)
 
-      }
-      
-      let ids = [...selectedRows]
-      
-    if(ids.length==0){
-      ids = store.data.map((item: any) => item.id)
-    }
-  
-    const exportData = store.data.filter((item: any) => ids.includes(item.id)).map((item: any) => {
-      return {
-        id: item.id,
-        fullName: item.fullName,
-        email: item.email,
-        telephone: item.telephone,
-        poste: item.poste,
-      }
-    })
-
-    exportExcel(visibilityModel,exportData, 'Employee')
+    exportExcel('employee', fields, 'Employees').catch(err => toast.error(t('Failed to export data') as string))
   }
-   const deleteEmployee = (id) => {
+
+  const deleteEmployee = id => {
     return new Promise(async (resolve, reject) => {
-      await http.delete(`Employes/${id}`).then((res) => {
-        dispatch(
-          fetchData({
-            q: currentQuery
-          })
-        )
-        resolve(res)
-      }).catch((err) => {
-        reject(err)
-      }
-      )
+      await http
+        .delete(`Employes/${id}`)
+        .then(res => {
+          dispatch(
+            fetchData({
+              q: currentQuery
+            })
+          )
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 
   return (
     <DatePickerWrapper>
-      <DeleteDialog
-      open={deleteDialog}
-      setOpen={setDeleteDialog}
-      deelete={deleteEmployee}
-      rowId={selectedRow}
-      />
-      <ImportXlsx
-        show={importShow}
-        setShow={setImportShow}
-        classe="employee"
-        fetchData={fetchData}
-        />
+      <DeleteDialog open={deleteDialog} setOpen={setDeleteDialog} deelete={deleteEmployee} rowId={selectedRow} />
+      <ImportXlsx show={importShow} setShow={setImportShow} classe='employee' fetchData={fetchData} />
       <Grid container spacing={6}>
         <AddEmployeeDialog setShow={setShow} show={show} mode={mode} employee={employee} />
         <Grid item xs={12}>
           <Card>
             <TableHeader
-            setShow={setImportShow}
-            exportXlsx={exportXlsx}
-            handleAdd={handleAdd} selectedRows={selectedRows} handleFilter={handleFilter} />
+              setShow={setImportShow}
+              exportXlsx={exportXlsx}
+              handleAdd={handleAdd}
+              selectedRows={selectedRows}
+              handleFilter={handleFilter}
+            />
 
             <DataGrid
               key={i18n.language}
@@ -269,8 +244,7 @@ const removeNullFromColumns = (columns: any) => {
               rowsPerPageOptions={[10, 25, 50]}
               onSelectionModelChange={rows => setSelectedRows(rows)}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
-              localeText={i18n.language=='fr'?frFR.components.MuiDataGrid.defaultProps.localeText:{}}
-             
+              localeText={i18n.language == 'fr' ? frFR.components.MuiDataGrid.defaultProps.localeText : {}}
             />
           </Card>
         </Grid>
@@ -278,8 +252,8 @@ const removeNullFromColumns = (columns: any) => {
     </DatePickerWrapper>
   )
 }
-EmployeeList.acl={
-  subject : 'employee',
+EmployeeList.acl = {
+  subject: 'employee',
   action: 'read'
 }
 

@@ -40,9 +40,7 @@ import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
 import Translations from 'src/layouts/components/Translations'
-
-
-
+import { toast } from 'react-hot-toast'
 
 interface CustomInputProps {
   dates: Date[]
@@ -63,8 +61,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }))
 
 // ** Vars
-const formatDate = (date:Date) => format(new Date(date), 'dd/MM/yyyy')
-
+const formatDate = (date: Date) => format(new Date(date), 'dd/MM/yyyy')
 
 const defaultColumns = [
   {
@@ -80,8 +77,9 @@ const defaultColumns = [
     minWidth: 150,
     field: 'name',
     headerName: 'Name',
-    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.nomEmp }`}</Typography>
-  },{
+    renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.nomEmp}`}</Typography>
+  },
+  {
     flex: 0.3,
     minWidth: 125,
     field: 'responsable',
@@ -93,8 +91,8 @@ const updatedColumns = defaultColumns.map(column => {
   return {
     ...column,
     headerName: <Translations text={`${column.headerName}`} />
-  };
-});
+  }
+})
 /* eslint-disable */
 const CustomInput = forwardRef((props: CustomInputProps, ref) => {
   const startDate = props.start !== null ? format(props.start, 'MM/dd/yyyy') : ''
@@ -112,15 +110,15 @@ const CustomInput = forwardRef((props: CustomInputProps, ref) => {
 const EmplacementList = () => {
   // ** State
   const [currentQuery, setCurrentQuery] = useState<string>('')
-  const {t,i18n} = useTranslation()
+  const { t, i18n } = useTranslation()
   const [pageSize, setPageSize] = useState<number>(10)
   const [selectedRows, setSelectedRows] = useState<GridRowId[]>([])
-    const [show,setShow] = useState<boolean>(false)
-    const [mode,setMode] = useState<'add'|'edit'>('add')
-    const [emplacement,setEmplacement] = useState<EmplacementType|undefined>(undefined)
-const ability = useContext(AbilityContext)
-const [ deleteDialog,setDeleteDialog] = useState<boolean>(false)
-const [selectedRow,setSelectedRow] = useState<any>(null)
+  const [show, setShow] = useState<boolean>(false)
+  const [mode, setMode] = useState<'add' | 'edit'>('add')
+  const [emplacement, setEmplacement] = useState<EmplacementType | undefined>(undefined)
+  const ability = useContext(AbilityContext)
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false)
+  const [selectedRow, setSelectedRow] = useState<any>(null)
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
@@ -143,123 +141,95 @@ const [selectedRow,setSelectedRow] = useState<any>(null)
     setCurrentQuery(val)
   }
 
-const handleEdit = (emplacement:EmplacementType) => {
+  const handleEdit = (emplacement: EmplacementType) => {
     setEmplacement(emplacement)
     setMode('edit')
     setShow(true)
-}
-const handleAdd = () => {
+  }
+  const handleAdd = () => {
     setEmplacement(undefined)
     setMode('add')
     setShow(true)
-}
+  }
 
   const columns = [
     ...updatedColumns,
-    ability?.can('update','emplacement') ?  {
-      flex: 0.05,
-      minWidth: 130,
-      sortable: false,
-      field: 'actions',
-      headerName: 'Actions',
-      renderCell: ({ row }: CellType) => (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {
-            ability?.can('delete','emplacement') && (<Tooltip title={t('Delete')}>
-            <IconButton size='small' onClick={() =>
-            
-          {
-            setSelectedRow(row.id)
-            setDeleteDialog(true)
-          }
-            }>
-              <Icon icon='mdi:delete-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
+    ability?.can('update', 'emplacement')
+      ? {
+          flex: 0.05,
+          minWidth: 130,
+          sortable: false,
+          field: 'actions',
+          headerName: 'Actions',
+          renderCell: ({ row }: CellType) => (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {ability?.can('delete', 'emplacement') && (
+                <Tooltip title={t('Delete')}>
+                  <IconButton
+                    size='small'
+                    onClick={() => {
+                      setSelectedRow(row.id)
+                      setDeleteDialog(true)
+                    }}
+                  >
+                    <Icon icon='mdi:delete-outline' fontSize={20} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title={t('Edit')}>
+                <IconButton size='small' onClick={() => handleEdit(row as EmplacementType)}>
+                  <Icon icon='mdi:pencil-outline' fontSize={20} />
+                </IconButton>
+              </Tooltip>
+            </Box>
           )
-          }
-          <Tooltip title={t('Edit')}>
-            <IconButton size='small' 
-            onClick={() => handleEdit(row as EmplacementType)}
-            >
-              <Icon icon='mdi:pencil-outline' fontSize={20} />
-            </IconButton>
-          </Tooltip>
-         
-        </Box>
-      )
-    }: null
-   
+        }
+      : null
   ]
 
   const removeNullFromColumns = (columns: any) => {
     return columns.filter((item: any) => item !== null)
   }
- const exportXlsx = () => {
-  const visibilityModel = {
-    id:true,
-    name:true,
-    responsable:true,
+  const exportXlsx = () => {
+    const fields = defaultColumns.map((item: any) => item.field)
 
+    exportExcel('location', fields, 'Emplacements').catch(err => toast.error(t('Failed to export data') as string))
   }
-  let ids = [...selectedRows]
-    if(ids.length==0){
-      ids = store.data.map((item: any) => item.id)
-    }
-  
-    const exportData = store.data.filter((item: any) => ids.includes(item.id)).map((item: any) => {
-      return {
-        id: item.id,
-        name: item.nomEmp,
-        responsable: item.employe? item.employe.fullName : 'N/A',
-        
-      }
-    })
-
-    exportExcel(visibilityModel,exportData, 'Emplacements')
-  }
-  const deleteEmplacement = (id) => {
+  const deleteEmplacement = id => {
     return new Promise(async (resolve, reject) => {
-      await http.delete(`Emplacements/${id}`).then((res) => {
-        dispatch(
-          fetchData({
-            q: currentQuery
-          })
-        )
-        resolve(res)
-      }).catch((err) => {
-        reject(err)
-      }
-      )
+      await http
+        .delete(`Emplacements/${id}`)
+        .then(res => {
+          dispatch(
+            fetchData({
+              q: currentQuery
+            })
+          )
+          resolve(res)
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 
   return (
     <DatePickerWrapper>
-      <DeleteDialog
-      open={deleteDialog}
-      setOpen={setDeleteDialog}
-      deelete={deleteEmplacement}
-      rowId={selectedRow}
-      />
+      <DeleteDialog open={deleteDialog} setOpen={setDeleteDialog} deelete={deleteEmplacement} rowId={selectedRow} />
 
       <Grid container spacing={6}>
-        <AddEmplacementDialog
-        setShow={setShow}
-        show={show}
-        mode = {mode}
-        emplacement={emplacement}
-        />
+        <AddEmplacementDialog setShow={setShow} show={show} mode={mode} emplacement={emplacement} />
         <Grid item xs={12}>
           <Card>
-            <TableHeader 
-            exportXlsx={exportXlsx}
-            handleAdd={handleAdd}
-            
-            selectedRows={selectedRows} handleFilter={handleFilter} />
-            
+            <TableHeader
+              exportXlsx={exportXlsx}
+              handleAdd={handleAdd}
+              selectedRows={selectedRows}
+              handleFilter={handleFilter}
+            />
+
             <DataGrid
-            key={i18n.language}
+              key={i18n.language}
               autoHeight
               pagination
               rows={store.data}
@@ -270,7 +240,7 @@ const handleAdd = () => {
               rowsPerPageOptions={[10, 25, 50]}
               onSelectionModelChange={rows => setSelectedRows(rows)}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
-              localeText={i18n.language==='fr' ? frFR.components.MuiDataGrid.defaultProps.localeText : {}}
+              localeText={i18n.language === 'fr' ? frFR.components.MuiDataGrid.defaultProps.localeText : {}}
             />
           </Card>
         </Grid>
@@ -279,10 +249,9 @@ const handleAdd = () => {
   )
 }
 
-EmplacementList.acl={
-  subject:'emplacement',
-  action : 'read'
+EmplacementList.acl = {
+  subject: 'emplacement',
+  action: 'read'
 }
-
 
 export default EmplacementList

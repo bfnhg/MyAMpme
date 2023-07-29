@@ -9,7 +9,7 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import Tooltip from '@mui/material/Tooltip'
-import { styled } from '@mui/material/styles'
+import { styled, useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
@@ -42,6 +42,8 @@ import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
 import { set } from 'nprogress'
+import { ca } from 'date-fns/locale'
+import { toast } from 'react-hot-toast'
 
 interface CustomInputProps {
   dates: Date[]
@@ -58,7 +60,9 @@ interface CellType {
 // ** Styled component for the link in the dataTable
 const StyledLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
-  color: theme.palette.primary.main
+
+  //check if dark mode is enabled, if not set the color to primary.main
+  color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.primary.main
 }))
 
 const etatColor = {
@@ -98,6 +102,9 @@ const formatDateTime = (date: Date) => {
 }
 
 const CustomToolbar = () => {
+  const theme = useTheme()
+  const darkMode = theme.palette.mode === 'dark'
+
   return (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
@@ -209,7 +216,7 @@ const ActifList = () => {
         <Typography variant='body2'>{`${row.produit.coutAcquisition ?? 'N/A'}`}</Typography>
       )
     },
-     {
+    {
       minWidth: 150,
       flex: 0.15,
       field: 'periodeGarantie',
@@ -232,7 +239,7 @@ const ActifList = () => {
       flex: 0.15,
       field: 'numBonCommande',
       headerName: 'Order Number',
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numBonCommande??'N/A'}`}</Typography>
+      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${row.numBonCommande ?? 'N/A'}`}</Typography>
     },
     {
       minWidth: 150,
@@ -276,9 +283,7 @@ const ActifList = () => {
       field: 'etat',
       headerName: 'State',
 
-      
       renderCell: ({ row }: CellType) => (
-
         //@ts-ignore
         <CustomChip label={t(Etat[row.etat])} skin='light' color={EtatColor[row.etat]} />
       )
@@ -423,7 +428,9 @@ const ActifList = () => {
       flex: 0.15,
       field: 'fonction',
       headerName: 'Function',
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{`${!row.fonction || row.fonction==="" ? 'N/A':row.fonction}`}</Typography>
+      renderCell: ({ row }: CellType) => (
+        <Typography variant='body2'>{`${!row.fonction || row.fonction === '' ? 'N/A' : row.fonction}`}</Typography>
+      )
     },
     {
       minWidth: 150,
@@ -523,48 +530,6 @@ const ActifList = () => {
   ]
 
   const exportXlsx = () => {
-    let ids = [...selectedRows]
-    if (ids.length == 0) {
-      ids = store.data.map((item: any) => item.id)
-    }
-
-    const exportData = store.data
-      .filter((item: any) => ids.includes(item.id))
-      .map((item: any) => {
-        return {
-          id: item.id,
-          etiquette: item.etiquette,
-          nom: item.nom,
-          numeroSerie: item.numeroSerie,
-          assignedTo: item.assignedTo ? item.assignedTo.nom : 'N/A',
-          gerePar: item.gerePar ? item.gerePar.nom : 'N/A',
-          proprietede: item.proprietede ? item.proprietede.nom : 'N/A',
-          updatedAt: item.updatedAt ? formatDate(item.updatedAt) : 'N/A',
-          assignedAt: item.assignedAt ? formatDate(item.assignedAt) : 'N/A',
-          prochaineMaintenance: item.prochaineMaintenance ? formatDate(item.prochaineMaintenance) : 'N/A',
-          dateRecu: item.dateRecu ? formatDate(item.dateRecu) : 'N/A',
-          finGarantie: item.finGarantie ? formatDate(item.finGarantie) : 'N/A',
-          heureUtilisation: item.heureUtilisation,
-          emplacement: item.emplacement ? item.emplacement.nomEmp : 'N/A',
-          fonction: item.fonction,
-          fournisseur: item.fournisseur ? item.fournisseur.name : 'N/A',
-          maintenanceEffectueLe: item.maintenanceEffectueLe ? formatDate(item.maintenanceEffectueLe) : 'N/A',
-          groupeSupport: item.groupeSupport ? item.groupeSupport.nom : 'N/A',
-          createdAt: item.createdAt ? formatDate(item.createdAt) : 'N/A',
-          etat: Etat[item.etat],
-          installedAt: item.installedAt ? formatDate(item.installedAt) : 'N/A',
-          nomModel: item.produit.nomModele ?? 'N/A',
-          class: item.produit.classe ?? 'N/A',
-          cost: item.produit.coutAcquisition ?? 'N/A',
-          manufacturer: item.produit.manufacturier ?? 'N/A',
-          mtbf: item.produit.mtbf ?? 'N/A',
-          finVie: item.produit.finVie ? formatDate(item.produit.finVie) : 'N/A',
-          finSupport: item.produit.finSupport ? formatDate(item.produit.finSupport) : 'N/A'
-
-          // product: item.produit? `${item.produit.nomModele} ${item.produit.numeroModele}`:'N/A',
-        }
-      })
-
     //get all columns
     const allColumns = columns.map((item: any) => item.field)
 
@@ -578,8 +543,12 @@ const ActifList = () => {
 
       return acc
     }, {})
+    // fields = ["nom","numBonCommande",...]
+    const fields = Object.keys(updatedVisibilityModel).filter((item: any) => updatedVisibilityModel[item] === true)
 
-    exportExcel(updatedVisibilityModel, exportData, 'Actif')
+    exportExcel('asset', fields, 'actif').catch(err => {
+      toast.error(t('Failed to export data') as string)
+    })
   }
   const deleteActif = id => {
     return new Promise(async (resolve, reject) => {
@@ -616,7 +585,6 @@ const ActifList = () => {
               autoHeight
               pagination
               rows={store.data}
-
               // @ts-ignore
               columns={columns}
               checkboxSelection
