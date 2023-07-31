@@ -18,10 +18,7 @@ namespace AM_PME_ASP_API.Controllers
         [HttpPost("export-actifs")]
         public async Task<IActionResult> ExportActifDataToExcel([FromBody] ExportRequestBody requestBody)
         {
-            if (requestBody == null)
-            {
-                return BadRequest("Request body is null.");
-            }
+            if (requestBody == null) return BadRequest("Request body is null.");
 
             var fileBytes = await _repository.ExportActifDataToExcel(requestBody.FileName, requestBody.Fields);
 
@@ -32,17 +29,42 @@ namespace AM_PME_ASP_API.Controllers
         [HttpPost("export-produits")]
         public async Task<IActionResult> ExportProduitDataToExcel([FromBody] ExportRequestBody requestBody)
         {
-            if (requestBody == null)
-            {
-                return BadRequest("Request body is null.");
-            }
+            if (requestBody == null) return BadRequest("Request body is null.");
 
             var fileBytes = await _repository.ExportProduitDataToExcel(requestBody.FileName, requestBody.Fields);
 
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", requestBody.FileName);
         }
+        
+        [HttpPost("export-employees")]
+        public async Task<IActionResult> ExportEmployeeDataToExcel([FromBody] ExportRequestBody requestBody)
+        {
+            if (requestBody == null) return BadRequest("Request body is null.");
+            
+            var fileBytes = await _repository.ExportEmployeDataToExcel(requestBody.FileName, requestBody.Fields);
 
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", requestBody.FileName);
+        }
+        
+        [HttpPost("export-fournisseurs")]
+        public async Task<IActionResult> ExportFournisseurDataToExcel([FromBody] ExportRequestBody requestBody)
+        {
+            if (requestBody == null) return BadRequest("Request body is null.");
+            
+            var fileBytes = await _repository.ExportFournisseurDataToExcel(requestBody.FileName, requestBody.Fields);
 
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", requestBody.FileName);
+        }
+        
+        [HttpPost("export-emplacements")]
+        public async Task<IActionResult> ExportEmplacementsDataToExcel([FromBody] ExportRequestBody requestBody)
+        {
+            if (requestBody == null) return BadRequest("Request body is null.");
+            
+            var fileBytes = await _repository.ExportEmplacementDataToExcel(requestBody.FileName, requestBody.Fields);
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", requestBody.FileName);
+        }
     }
 }
 
