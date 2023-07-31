@@ -16,7 +16,7 @@
     
     // add new line above comment
     "lines-around-comment": [
-      "error",
+      "off",
       {
         "beforeLineComment": true,
         "beforeBlockComment": true,

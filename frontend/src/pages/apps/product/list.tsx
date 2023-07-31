@@ -47,6 +47,7 @@ import DeleteDialog from 'src/views/apps/DeleteDialog'
 import { http } from 'src/global/http'
 import { useTranslation } from 'react-i18next'
 import { set } from 'nprogress'
+import { toast } from 'react-hot-toast'
 
 interface CustomInputProps {
   dates: Date[]
@@ -283,27 +284,6 @@ const ProductList = () => {
     }
   ]
   const exportXlsx = () => {
-    let ids = [...selectedRows]
-    if (ids.length == 0) {
-      ids = store.data.map((item: any) => item.id)
-    }
-
-    const exportData = store.data
-      .filter((item: any) => ids.includes(item.id))
-      .map((item: any) => {
-        return {
-          id: item.id,
-          nomModele: item.nomModele,
-          numeroModele: item.numeroModele,
-          classe: item.classe,
-          coutAcquisition: item.coutAcquisition,
-          manufacturer: item.manufacturier,
-          mtbf: item.mtbf ? `${item.mtbf} H` : 'N/A',
-          periodeGarantie: item.periodeGarantie,
-          finVie: formatDate(item.finVie),
-          finSupport: formatDate(item.finSupport)
-        }
-      })
     const allColumns = columns.map((item: any) => item.field)
 
     const updatedVisibilityModel = allColumns.reduce((acc: any, item: any) => {
@@ -315,8 +295,11 @@ const ProductList = () => {
 
       return acc
     }, {})
+    const fields = Object.keys(updatedVisibilityModel).filter((item: any) => updatedVisibilityModel[item] === true)
 
-    exportExcel(updatedVisibilityModel, exportData, 'products')
+    exportExcel('product', fields, 'produit').catch(err => {
+      toast.error(t('Failed to export data') as string)
+    })
   }
   const deleteProduct = id => {
     return new Promise(async (resolve, reject) => {
@@ -342,11 +325,7 @@ const ProductList = () => {
       <Grid container spacing={6}>
         <Grid item xs={12}>
           <Card>
-            <TableHeader
-              exportXlsx={exportXlsx}
-              selectedRows={selectedRows}
-              handleFilter={handleFilter}
-            />
+            <TableHeader exportXlsx={exportXlsx} selectedRows={selectedRows} handleFilter={handleFilter} />
 
             <DataGrid
               key={i18n.language}
@@ -358,7 +337,6 @@ const ProductList = () => {
               autoHeight
               pagination
               rows={store.data}
-              
               // @ts-ignore
               columns={columns}
               checkboxSelection
