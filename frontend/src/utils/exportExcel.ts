@@ -5,7 +5,7 @@ enum apiEndpoint {
   asset = 'ExportDatas/export-actifs',
   product = 'ExportDatas/export-produits',
   location = 'ExportDatas/export-emplacements',
-  employee = 'ExportDatas/export-employes',
+  employee = 'ExportDatas/export-employees',
   supplier = 'ExportDatas/export-fournisseurs'
 }
 

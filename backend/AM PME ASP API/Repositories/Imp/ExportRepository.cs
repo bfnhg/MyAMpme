@@ -178,8 +178,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 var worksheet = package.Workbook.Worksheets.Add("Produits");
 
                 var produitData = await _db.Produits.Include(p => p.Updater).Include(p => p.Creator).ToListAsync();
-<<<<<<< HEAD
-                
+
                 if (fields.Count == 0)
                 {
                     fields = new List<string>
@@ -199,8 +198,6 @@ namespace AM_PME_ASP_API.Repositories.Imp
                         "Manufacturier"
                     };
                 }
-=======
->>>>>>> cc8251f36ef7eb2d1e7c5631b7bfa12ad12d3c8c
 
                 for (int i = 0; i < fields.Count; i++)
                 {
@@ -232,7 +229,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
             }
         }
 
-        public async Task<byte[]> ExportEmployeDataToExcel(string fileName, List<string> fields)
+        public async Task<byte[]> ExportEmployeDataToExcel(string fileName)
         {
             using (var package = new ExcelPackage())
             {
@@ -240,9 +237,8 @@ namespace AM_PME_ASP_API.Repositories.Imp
 
                 var employeData = await _db.Employes.Include(e => e.Creator).Include(e => e.Updater).ToListAsync();
 
-                if (fields.Count == 0)
-                {
-                    fields = new List<string>
+
+                List<string> fields = new List<string>
                     {
                         "FullName",
                         "Email",
@@ -253,13 +249,12 @@ namespace AM_PME_ASP_API.Repositories.Imp
                         "Mis à jour le",
                         "Mis à jour par",
                     };
-                }
-                
+
                 for (int i = 0; i < fields.Count; i++)
                 {
                     worksheet.Cells[1, i + 1].Value = fields[i];
                 }
-                
+
                 for (int i = 0; i < employeData.Count; i++)
                 {
                     var employe = employeData[i];
@@ -272,13 +267,13 @@ namespace AM_PME_ASP_API.Repositories.Imp
                         else if (field == "Email") worksheet.Cells[i + 2, j + 1].Value = employe.Email;
                         else if (field == "Telephone") worksheet.Cells[i + 2, j + 1].Value = employe.Telephone;
                         else if (field == "Poste") worksheet.Cells[i + 2, j + 1].Value = employe.Poste;
-                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = employe.CreatedAt;
+                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = employe.CreatedAt.ToString("dd/MM/yyyy HH:mm");
                         else if (field == "Créé par") worksheet.Cells[i + 2, j + 1].Value = employe.Creator?.FullName;
-                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = employe.UpdatedAt;
+                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = employe.UpdatedAt.ToString("dd/MM/yyyy HH:mm");
                         else if (field == "Mis à jour par") worksheet.Cells[i + 2, j + 1].Value = employe.Updater?.FullName;
                     }
                 }
-                
+
                 using (var stream = new MemoryStream())
                 {
                     package.SaveAs(stream);
@@ -287,7 +282,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
             }
         }
 
-        public async Task<byte[]> ExportEmplacementDataToExcel(string fileName, List<string> fields)
+        public async Task<byte[]> ExportEmplacementDataToExcel(string fileName)
         {
             using (var package = new ExcelPackage())
             {
@@ -297,10 +292,8 @@ namespace AM_PME_ASP_API.Repositories.Imp
                                                             .Include(emp => emp.Creator)
                                                             .Include(emp => emp.Updater)
                                                             .ToListAsync();
-                
-                if (fields.Count == 0)
-                {
-                    fields = new List<string>
+
+                List<string> fields = new List<string>
                     {
                         "Name",
                         "Responsable",
@@ -309,13 +302,12 @@ namespace AM_PME_ASP_API.Repositories.Imp
                         "Mis à jour le",
                         "Mis à jour par",
                     };
-                }
-                
+
                 for (int i = 0; i < fields.Count; i++)
                 {
                     worksheet.Cells[1, i + 1].Value = fields[i];
                 }
-                
+
                 for (int i = 0; i < emplacementData.Count; i++)
                 {
                     var emplacement = emplacementData[i];
@@ -326,13 +318,13 @@ namespace AM_PME_ASP_API.Repositories.Imp
 
                         if (field == "Name") worksheet.Cells[i + 2, j + 1].Value = emplacement.NomEmp;
                         else if (field == "Responsable") worksheet.Cells[i + 2, j + 1].Value = emplacement.Employe?.FullName;
-                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = emplacement.CreatedAt;
+                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = emplacement.CreatedAt.ToString("dd/MM/yyyy HH:mm");
                         else if (field == "Créé par") worksheet.Cells[i + 2, j + 1].Value = emplacement.Creator?.FullName;
-                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = emplacement.UpdatedAt;
+                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = emplacement.UpdatedAt.ToString("dd/MM/yyyy HH:mm");
                         else if (field == "Mis à jour par") worksheet.Cells[i + 2, j + 1].Value = emplacement.Updater?.FullName;
                     }
                 }
-                
+
                 using (var stream = new MemoryStream())
                 {
                     package.SaveAs(stream);
@@ -341,7 +333,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
             }
         }
 
-        public async Task<byte[]> ExportFournisseurDataToExcel(string fileName, List<string> fields)
+        public async Task<byte[]> ExportFournisseurDataToExcel(string fileName)
         {
             using (var package = new ExcelPackage())
             {
@@ -351,9 +343,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                                                             .Include(f => f.Updater)
                                                             .ToListAsync();
 
-                if (fields.Count == 0)
-                {
-                    fields = new List<string>
+                List<string> fields = new List<string>
                     {
                         "Name",
                         "Email",
@@ -364,13 +354,12 @@ namespace AM_PME_ASP_API.Repositories.Imp
                         "Mis à jour le",
                         "Mis à jour par",
                     };
-                }
-                
+
                 for (int i = 0; i < fields.Count; i++)
                 {
                     worksheet.Cells[1, i + 1].Value = fields[i];
                 }
-                
+
                 for (int i = 0; i < fournisseurData.Count; i++)
                 {
                     var fournisseur = fournisseurData[i];
@@ -383,9 +372,9 @@ namespace AM_PME_ASP_API.Repositories.Imp
                         else if (field == "Email") worksheet.Cells[i + 2, j + 1].Value = fournisseur.Email;
                         else if (field == "Telephone") worksheet.Cells[i + 2, j + 1].Value = fournisseur.Telephone;
                         else if (field == "Adresse") worksheet.Cells[i + 2, j + 1].Value = fournisseur.Adresse;
-                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = fournisseur.CreatedAt;
+                        else if (field == "Créé le") worksheet.Cells[i + 2, j + 1].Value = fournisseur.CreatedAt.ToString("dd/MM/yyyy HH:mm");
                         else if (field == "Créé par") worksheet.Cells[i + 2, j + 1].Value = fournisseur.Creator?.FullName;
-                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = fournisseur.UpdatedAt;
+                        else if (field == "Mis à jour le") worksheet.Cells[i + 2, j + 1].Value = fournisseur.UpdatedAt.ToString("dd/MM/yyyy HH:mm");
                         else if (field == "Mis à jour par") worksheet.Cells[i + 2, j + 1].Value = fournisseur.Updater?.FullName;
                     }
                 }
