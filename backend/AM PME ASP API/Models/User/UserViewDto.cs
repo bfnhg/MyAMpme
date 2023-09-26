@@ -23,6 +23,8 @@ namespace AM_PME_ASP_API.Models.User
         public DateTime UpdatedAt { get; set; }
 
         public List<RoleViewDto> Roles { get; set; }
+
+        public long EnterpriseId { get; set; }
     }
 }
 

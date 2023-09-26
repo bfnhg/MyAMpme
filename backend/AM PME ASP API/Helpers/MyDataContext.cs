@@ -21,6 +21,7 @@ namespace AM_PME_ASP_API.Helpers
         public DbSet<Emplacement> Emplacements { get; set; }
         public DbSet<Fournisseur> Fournisseurs { get; set; }
         public DbSet<Employe> Employes { get; set; }
+        public DbSet<Entreprise> Enterprise { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

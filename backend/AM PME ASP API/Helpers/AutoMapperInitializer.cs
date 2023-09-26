@@ -22,6 +22,7 @@ namespace AM_PME_ASP_API.Helpers
 
             CreateMappingsForUsers();
             CreateMappingsForRoles();
+            CreateMappingsForEnterprise();
         }
 
         private void CreateMappingsForActifs()
@@ -111,6 +112,12 @@ namespace AM_PME_ASP_API.Helpers
             CreateMap<Role, RoleViewDto>().ReverseMap();
             CreateMap<Role, RoleCreateDto>().ReverseMap();
             CreateMap<Role, RoleUpdateDto>().ReverseMap();
+        }
+        
+        private void CreateMappingsForEnterprise()
+        {
+            CreateMap<Entreprise, CreateEnterpriseDto>().ReverseMap();
+            CreateMap<Entreprise, UpdateEnterpriseDto>().ReverseMap();
         }
     }
 }

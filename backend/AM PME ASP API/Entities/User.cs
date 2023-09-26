@@ -25,6 +25,12 @@ namespace AM_PME_ASP_API.Entities
         public List<UserRole> UserRoles { get; set; }
 
         public List<Actif> Actifs { get; set; }
+
+
+
+
+        public Entreprise Entreprise { get; set; }
+        public long EntrepriseId { get; set; }
     }
 }
 

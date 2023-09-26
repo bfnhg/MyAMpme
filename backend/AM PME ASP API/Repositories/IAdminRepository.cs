@@ -12,7 +12,7 @@ namespace AM_PME_ASP_API.Repositories
         public Task<bool> DeleteUser(User user);
         public Task<User> GetUserById(string userId);
         public Task<User> GetUserByEmail(string email);
-        public Task<List<User>> GetAllUsers();
+        public Task<List<User>> GetAllUsers(long Id);
         public Task<bool> ValidateUserCredentials(string email, string password);
 
         public Task<List<string>> GetUserRoles(User user);
@@ -21,7 +21,7 @@ namespace AM_PME_ASP_API.Repositories
         public Task<Role> CreateRole(Role role);
         public Task<Role> UpdateRole(Role role);
         public Task DeleteRoleById(string roleId);
-        public Task<IList<User>> GetUsersInRole(string roleName);
+        public Task<IList<User>> GetUsersInRole(string roleName, long Id);
         public Task<Role> GetRoleById(string roleId);
         public Task AddUserToRole(User user, string roleName);
         public Task<Role> GetRoleByName(string roleName);

@@ -116,6 +116,13 @@ builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IExportRepository, ExportRepository>();
 
+
+
+
+
+
+builder.Services.AddScoped<IEntrepriseRepository, EnterpriseRepository>();
+
 // adding AutoMapper to the application using Dependency Injection :
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

@@ -58,16 +58,17 @@ namespace AM_PME_ASP_API.Controllers
                 Role = role ?? "",
                 FullName = user.FullName,
                 UserName = user.UserName,
-                Email = user.Email
+                Email = user.Email,
+                EnterpriseId = user.EntrepriseId
             };
 
             return Ok(userData);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(long Id)
         {
-            var users = await _repository.GetAllUsers();
+            var users = await _repository.GetAllUsers(Id);
             var userDtos = users.Select(u => new
             {
                 Id = u.Id,
@@ -77,7 +78,8 @@ namespace AM_PME_ASP_API.Controllers
                 Username = u.UserName,
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt,
-                Roles = u.UserRoles.Select(ur => ur.Role.Name)
+                Roles = u.UserRoles.Select(ur => ur.Role.Name),
+                EnterpriseId = u.EntrepriseId
             });
 
             return Ok(userDtos);

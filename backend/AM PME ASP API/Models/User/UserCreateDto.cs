@@ -20,6 +20,8 @@ namespace AM_PME_ASP_API.Models.User
         public DateTime? UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
 
         public List<string> Roles { get; set; }
+
+        public long EnterpriseId { get; set; }
     }
 }
 

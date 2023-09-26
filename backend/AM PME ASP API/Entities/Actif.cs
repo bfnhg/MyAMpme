@@ -124,5 +124,9 @@ namespace AM_PME_ASP_API.Entities
         {
             get { return Etat == Etat.Dispose; }
         }
+
+
+        public Entreprise Entreprise { get; set; }
+        public long EntrepriseId { get; set; }
     }
 }

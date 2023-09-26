@@ -145,9 +145,9 @@ namespace AM_PME_ASP_API.Repositories.Imp
             throw new UserNotFoundException($"No user was found with email {email}.");
         }
 
-        public async Task<List<User>> GetAllUsers()
+        public async Task<List<User>> GetAllUsers(long Id)
         {
-            var users = await _userManager.Users.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).ToListAsync();
+            var users = await _userManager.Users.Where(e=>e.EntrepriseId == Id).Include(u => u.UserRoles).ThenInclude(ur => ur.Role).ToListAsync();
 
             return users;
         }
@@ -221,7 +221,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
             }
         }
 
-        public async Task<IList<User>> GetUsersInRole(string roleName)
+        public async Task<IList<User>> GetUsersInRole(string roleName, long Id)
         {
             var role = await _roleManager.FindByNameAsync(roleName);
 
@@ -230,8 +230,7 @@ namespace AM_PME_ASP_API.Repositories.Imp
                 throw new RoleNotFoundException($"Role '{roleName}' not found");
             }
 
-            var users = await _userManager.GetUsersInRoleAsync(roleName);
-
+            var users = (await _userManager.GetUsersInRoleAsync(roleName)).Where(e => e.EntrepriseId == Id);
             return users.ToList();
         }
 
